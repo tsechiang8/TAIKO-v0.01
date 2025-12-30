@@ -1,0 +1,2503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>下克上小助手v0.01内测版 - 路人小狼 巨献</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #8B4513;
+            --secondary-color: #D2691E;
+            --bg-color: #FDF5E6;
+            --text-color: #2F1810;
+            --border-color: #A0522D;
+            --header-bg: #654321;
+            --success-color: #228B22;
+            --danger-color: #B22222;
+            --warning-color: #DAA520;
+        }
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #FDF5E6 0%, #DEB887 100%);
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .login-box {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            border: 3px solid var(--primary-color);
+        }
+        .login-box h1 { color: var(--primary-color); margin-bottom: 10px; font-size: 28px; }
+        .login-box .subtitle { color: var(--secondary-color); margin-bottom: 30px; font-size: 14px; }
+        .login-box input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .login-box input:focus { outline: none; border-color: var(--primary-color); }
+        .login-box button {
+            width: 100%;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .login-box button:hover { transform: translateY(-2px); }
+        .main-container { display: none; min-height: 100vh; }
+        .top-nav {
+            background: linear-gradient(135deg, var(--header-bg), var(--primary-color));
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .top-nav h1 { font-size: 22px; }
+        .top-nav .user-info { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .top-nav .user-info span { background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 15px; font-size: 14px; }
+        .top-nav button { padding: 8px 16px; background: var(--danger-color); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; }
+        .top-nav button:hover { opacity: 0.9; }
+        .top-nav button.btn-success { background: var(--success-color); }
+        .top-nav button.btn-warning { background: var(--warning-color); }
+        .content { padding: 20px; max-width: 1800px; margin: 0 auto; }
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 12px 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-body { padding: 15px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: var(--bg-color);
+            border-radius: 5px;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        .info-item .label { color: var(--primary-color); font-weight: bold; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        th { background: var(--header-bg); color: white; position: sticky; top: 0; z-index: 10; }
+        tr:hover { background: var(--bg-color); }
+        .table-scroll { max-height: 400px; overflow-y: auto; }
+        .btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; margin: 1px; }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-success { background: var(--success-color); color: white; }
+        .btn-danger { background: var(--danger-color); color: white; }
+        .btn-warning { background: var(--warning-color); color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn:hover { opacity: 0.85; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 15px; max-width: 700px; width: 95%; max-height: 85vh; overflow-y: auto; }
+        .modal-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 15px 20px; border-radius: 15px 15px 0 0; display: flex; justify-content: space-between; align-items: center; }
+        .modal-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+        .modal-body { padding: 20px; }
+        .modal-footer { padding: 15px 20px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 4px; font-weight: bold; color: var(--primary-color); font-size: 13px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-color); }
+        .form-group.error input { border-color: var(--danger-color); animation: shake 0.3s; }
+        .form-group .error-msg { color: var(--danger-color); font-size: 11px; display: none; }
+        .form-group.error .error-msg { display: block; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+        .slider-group { display: flex; align-items: center; gap: 10px; }
+        .slider-group input[type="range"] { flex: 1; }
+        .slider-group input[type="number"] { width: 80px; text-align: center; }
+        .admin-tabs { display: flex; background: var(--header-bg); flex-wrap: wrap; }
+        .admin-tab { padding: 12px 18px; background: transparent; color: rgba(255,255,255,0.7); border: none; cursor: pointer; font-size: 13px; }
+        .admin-tab:hover { background: rgba(255,255,255,0.1); color: white; }
+        .admin-tab.active { background: white; color: var(--primary-color); }
+        .admin-panel { display: none; background: white; padding: 15px; border: 1px solid var(--border-color); border-top: none; }
+        .admin-panel.active { display: block; }
+        .toolbar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: center; }
+        .toolbar input, .toolbar select { padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
+        .buff-tag { display: inline-block; background: var(--success-color); color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; margin: 1px; }
+        .level-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .level-0 { background: #dc3545; color: white; }
+        .level-1 { background: #6c757d; color: white; }
+        .level-2 { background: #17a2b8; color: white; }
+        .level-3 { background: #28a745; color: white; }
+        .level-4 { background: #007bff; color: white; }
+        .level-5 { background: #6f42c1; color: white; }
+        .level-6 { background: #fd7e14; color: white; }
+        .level-7 { background: #e83e8c; color: white; }
+        .progress-bar { height: 8px; background: #eee; border-radius: 4px; overflow: hidden; margin-top: 5px; }
+        .progress-bar .fill { height: 100%; background: var(--success-color); transition: width 0.3s; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: var(--secondary-color); border-radius: 4px; }
+        @media (max-width: 1200px) { .grid-4, .grid-3 { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <h1>⚔️ 下克上小助手</h1>
+            <p class="subtitle">v0.01内测版 - 路人小狼 巨献</p>
+            <input type="text" id="loginCode" placeholder="请输入登录代码" autocomplete="off">
+            <button onclick="handleLogin()">进入游戏</button>
+        </div>
+    </div>
+    <div class="main-container" id="mainContainer">
+        <div class="top-nav">
+            <h1>⚔️ 下克上小助手 v0.01</h1>
+            <div class="user-info">
+                <span id="currentUser">当前用户：-</span>
+                <span id="currentYear">年份：1560年</span>
+                <button class="btn-success" onclick="copyShareLink()" id="shareLinkBtn">复制联网链接</button>
+                <button class="btn-warning" onclick="nextYear()" id="nextYearBtn" style="display:none;">下一年</button>
+                <button onclick="handleLogout()">退出登录</button>
+            </div>
+        </div>
+        <div class="content" id="playerView" style="display: none;"></div>
+        <div class="content" id="adminView" style="display: none;">
+            <div class="admin-tabs">
+                <button class="admin-tab active" onclick="switchAdminTab('territories')">郡国数据管理</button>
+                <button class="admin-tab" onclick="switchAdminTab('factions')">势力管理</button>
+                <button class="admin-tab" onclick="switchAdminTab('products')">特产对照表</button>
+                <button class="admin-tab" onclick="switchAdminTab('armies')">全军团一览</button>
+                <button class="admin-tab" onclick="switchAdminTab('chronicle')">记账与推演</button>
+                <button class="admin-tab" onclick="switchAdminTab('investment')">投资系统</button>
+                <button class="admin-tab" onclick="switchAdminTab('import')">数据导入</button>
+                <button class="admin-tab" onclick="switchAdminTab('logs')">操作记录</button>
+                <button class="admin-tab" onclick="switchAdminTab('backup')">数据备份</button>
+            </div>
+            <div class="admin-panel active" id="panel-territories"></div>
+            <div class="admin-panel" id="panel-factions"></div>
+            <div class="admin-panel" id="panel-products"></div>
+            <div class="admin-panel" id="panel-armies"></div>
+            <div class="admin-panel" id="panel-chronicle"></div>
+            <div class="admin-panel" id="panel-investment"></div>
+            <div class="admin-panel" id="panel-import"></div>
+            <div class="admin-panel" id="panel-logs"></div>
+            <div class="admin-panel" id="panel-backup"></div>
+        </div>
+    </div>
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">标题</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer" id="modalFooter"></div>
+        </div>
+    </div>
+<script>
+
+// ==================== 数据结构 ====================
+const DEFAULT_DATA = {
+    version: '0.02',
+    currentYear: 1560,
+    // 特产对照表
+    products: {
+        '金山': { name: '金山', koku: 5000, horses: 0, soldiers: 0, kokuBonus: 10, effect: '产出黄金' },
+        '银山': { name: '银山', koku: 3000, horses: 0, soldiers: 0, kokuBonus: 5, effect: '产出白银' },
+        '铁矿': { name: '铁矿', koku: 1000, horses: 0, soldiers: 0, kokuBonus: 0, effect: '铁炮生产成本-20%' },
+        '马场': { name: '马场', koku: 500, horses: 50, soldiers: 0, kokuBonus: 0, effect: '每年产出战马' },
+        '良田': { name: '良田', koku: 2000, horses: 0, soldiers: 500, kokuBonus: 3, effect: '增加士兵上限' },
+        '港口': { name: '港口', koku: 3000, horses: 0, soldiers: 0, kokuBonus: 8, effect: '海上贸易收入' },
+        '温泉': { name: '温泉', koku: 1500, horses: 0, soldiers: 0, kokuBonus: 2, effect: '士气恢复加快' },
+        '商业街': { name: '商业街', koku: 2500, horses: 0, soldiers: 0, kokuBonus: 6, effect: '商业繁荣' }
+    },
+    // 令制国石高数据（用于判断整合奖励）
+    provinces: {
+        '若狭国': { koku: 85000, code: 'RUXI' },
+        '越前国': { koku: 495000, code: 'YUEQI' },
+        '加贺国': { koku: 355000, code: 'JIAGE' },
+        '能登国': { koku: 210000, code: 'NEDE' },
+        '越中国': { koku: 380000, code: 'YUEZH' },
+        '越后国': { koku: 390000, code: 'YUEHO' },
+        '佐渡国': { koku: 17000, code: 'ZUOD' },
+        '尾张国': { koku: 571000, code: 'WEIZH' },
+        '三河国': { koku: 290000, code: 'SAHE' },
+        '远江国': { koku: 255000, code: 'YUJI' },
+        '�的河国': { koku: 151000, code: 'TUHE' },
+        '伊豆国': { koku: 70000, code: 'YIDO' },
+        '甲斐国': { koku: 227000, code: 'JIABE' },
+        '相模国': { koku: 194000, code: 'XIAM' },
+        '武藏国': { koku: 667000, code: 'WUCA' },
+        '安房国': { koku: 43000, code: 'ANFA' },
+        '上总国': { koku: 378000, code: 'SHZO' },
+        '下总国': { koku: 390000, code: 'XIAZO' },
+        '常陆国': { koku: 530000, code: 'CHAL' },
+        '近江国': { koku: 775000, code: 'JINJI' },
+        '美浓国': { koku: 540000, code: 'MEIN' },
+        '飞驒国': { koku: 38000, code: 'FEIT' },
+        '信浓国': { koku: 408000, code: 'XINN' },
+        '上野国': { koku: 496000, code: 'SHYE' },
+        '下野国': { koku: 374000, code: 'XIAYE' },
+        '�的奥国': { koku: 1670000, code: 'TUAO' },
+        '出羽国': { koku: 318000, code: 'CHUY' },
+        '山城国': { koku: 225000, code: 'SHCH' },
+        '大和国': { koku: 449000, code: 'DAHE' },
+        '河内国': { koku: 242000, code: 'HEN' },
+        '和泉国': { koku: 143000, code: 'HEQU' },
+        '�的津国': { koku: 356000, code: 'TUJIN' },
+        '丹波国': { koku: 263000, code: 'DANB' },
+        '丹后国': { koku: 111000, code: 'DANH' },
+        '但马国': { koku: 113000, code: 'DANM' },
+        '因幡国': { koku: 89000, code: 'YINF' },
+        '伯耆国': { koku: 100000, code: 'BOQI' },
+        '出云国': { koku: 186000, code: 'CHUY' },
+        '石见国': { koku: 112000, code: 'SHIJ' },
+        '�的岐国': { koku: 5000, code: 'TUQI' },
+        '播磨国': { koku: 359000, code: 'BOM' },
+        '美作国': { koku: 186000, code: 'MEIZ' },
+        '备前国': { koku: 224000, code: 'BEIQ' },
+        '备中国': { koku: 178000, code: 'BEIZH' },
+        '备后国': { koku: 186000, code: 'BEIH' },
+        '安艺国': { koku: 194000, code: 'ANYI' },
+        '周防国': { koku: 168000, code: 'ZHOUF' },
+        '长门国': { koku: 133000, code: 'CHAM' },
+        '纪伊国': { koku: 245000, code: 'JIYI' },
+        '�的路国': { koku: 186000, code: 'TUL' },
+        '阿波国': { koku: 184000, code: 'AB' },
+        '赞岐国': { koku: 126000, code: 'ZANQ' },
+        '伊予国': { koku: 367000, code: 'YIY' },
+        '土佐国': { koku: 98000, code: 'TUZUO' },
+        '筑前国': { koku: 326000, code: 'ZHUQI' },
+        '筑后国': { koku: 266000, code: 'ZHUH' },
+        '丰前国': { koku: 140000, code: 'FEQI' },
+        '丰后国': { koku: 418000, code: 'FEHO' },
+        '肥前国': { koku: 309000, code: 'FEIQI' },
+        '肥后国': { koku: 341000, code: 'FEIH' },
+        '日向国': { koku: 120000, code: 'RIXI' },
+        '大隅国': { koku: 178000, code: 'DAY' },
+        '萨摩国': { koku: 283000, code: 'SAM' },
+        '的�的国': { koku: 28000, code: 'TUTU' },
+        '对马国': { koku: 21000, code: 'DUIM' },
+        '伊贺国': { koku: 100000, code: 'YIGA' },
+        '伊势国': { koku: 567000, code: 'YISH' },
+        '志摩国': { koku: 18000, code: 'ZHIM' }
+    },
+    // 势力数据
+    factions: {
+        'oda': {
+            id: 'oda',
+            name: '织田家',
+            lord: '织田信长',
+            code: 'oda',
+            taxRate: 60,
+            industryKoku: 10000,
+            agriculture: { points: 30, level: 2 },
+            commerce: { points: 0 },
+            navy: { points: 15, level: 1 },
+            armament: { points: 25, level: 2 },
+            arsenal: { guns: 100, horses: 50, cannons: 5 },
+            soldiers: { idle: 500, total: 0 },
+            money: 50000,
+            buffs: [],
+            samurai: [
+                { name: '柴田胜家', type: '猛将', martial: 85, civil: 45 },
+                { name: '丹羽长秀', type: '智将', martial: 65, civil: 80 },
+                { name: '羽柴秀吉', type: '智将', martial: 70, civil: 90 },
+                { name: '德川家康', type: '猛将', martial: 80, civil: 75 }
+            ],
+            diplomacy: [
+                { target: '今川家', relation: '敌对' },
+                { target: '武田家', relation: '中立' },
+                { target: '浅井家', relation: '友好' }
+            ]
+        },
+        'takeda': {
+            id: 'takeda',
+            name: '武田家',
+            lord: '武田信玄',
+            code: 'takeda',
+            taxRate: 60,
+            industryKoku: 10000,
+            agriculture: { points: 45, level: 3 },
+            commerce: { points: 0 },
+            navy: { points: 5, level: 0 },
+            armament: { points: 40, level: 3 },
+            arsenal: { guns: 30, horses: 200, cannons: 2 },
+            soldiers: { idle: 800, total: 0 },
+            money: 80000,
+            buffs: [],
+            samurai: [
+                { name: '山县昌景', type: '猛将', martial: 90, civil: 40 },
+                { name: '马场信春', type: '猛将', martial: 85, civil: 50 }
+            ],
+            diplomacy: [
+                { target: '上杉家', relation: '敌对' },
+                { target: '今川家', relation: '同盟' }
+            ]
+        }
+    },
+    // 领地数据
+    territories: [
+        {
+            code: 'WEIZH01',
+            province: '尾张国',
+            name: '春日井郡',
+            castle: '清洲城',
+            castleLevel: 5,
+            baseKoku: 50000,
+            product1: '商业街',
+            product2: '',
+            product3: '',
+            developableProduct: '港口',
+            owner: 'oda',
+            garrison: '织田本队',
+            description: '尾张国的中心地带，织田家的根据地。清洲城是织田信长统一尾张后的居城。'
+        },
+        {
+            code: 'WEIZH02',
+            province: '尾张国',
+            name: '爱知郡',
+            castle: '那古野城',
+            castleLevel: 4,
+            baseKoku: 35000,
+            product1: '良田',
+            product2: '',
+            product3: '',
+            developableProduct: '马场',
+            owner: 'oda',
+            garrison: '',
+            description: '织田信长的出生地，具有重要的战略意义。'
+        },
+        {
+            code: 'JIABE01',
+            province: '甲斐国',
+            name: '山梨郡',
+            castle: '的府城',
+            castleLevel: 6,
+            baseKoku: 40000,
+            product1: '金山',
+            product2: '马场',
+            product3: '',
+            developableProduct: '',
+            owner: 'takeda',
+            garrison: '武田骑兵队',
+            description: '武田家的本据地，拥有丰富的金矿资源。'
+        }
+    ],
+    // 军团数据
+    armies: [
+        { id: 1, faction: 'oda', name: '织田本队', general: '柴田胜家', soldiers: 300, guns: 50, horses: 20, cannons: 2, location: '春日井郡' },
+        { id: 2, faction: 'takeda', name: '武田骑兵队', general: '山县昌景', soldiers: 500, guns: 10, horses: 150, cannons: 0, location: '山梨郡' }
+    ],
+    chronicles: [],
+    operationLogs: [],
+    nextArmyId: 3,
+    nextChronicleId: 1
+};
+
+// ==================== 全局状态 ====================
+let gameData = null;
+let currentUser = null;
+let currentFaction = null;
+let isAdmin = false;
+
+// ==================== 初始化 ====================
+function init() {
+    loadData();
+    checkUrlLogin();
+}
+
+function loadData() {
+    const saved = localStorage.getItem('gekokujo_data_v2');
+    if (saved) {
+        try {
+            gameData = JSON.parse(saved);
+            // 确保新字段存在
+            if (!gameData.products) gameData.products = DEFAULT_DATA.products;
+            if (!gameData.provinces) gameData.provinces = DEFAULT_DATA.provinces;
+        } catch (e) {
+            gameData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        }
+    } else {
+        gameData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+}
+
+function saveData() {
+    localStorage.setItem('gekokujo_data_v2', JSON.stringify(gameData));
+}
+
+function checkUrlLogin() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    if (code) {
+        document.getElementById('loginCode').value = code;
+        handleLogin();
+    }
+}
+
+// ==================== 登录系统 ====================
+function handleLogin() {
+    const code = document.getElementById('loginCode').value.trim();
+    if (!code) { alert('请输入登录代码'); return; }
+    if (code === 'admin') {
+        isAdmin = true;
+        currentUser = '管理员';
+        currentFaction = null;
+        showMainInterface();
+        addOperationLog('管理员', '登录系统');
+        return;
+    }
+    for (const fid in gameData.factions) {
+        if (gameData.factions[fid].code === code) {
+            isAdmin = false;
+            currentUser = gameData.factions[fid].name;
+            currentFaction = fid;
+            showMainInterface();
+            addOperationLog(gameData.factions[fid].name, '登录系统');
+            return;
+        }
+    }
+    alert('无效的登录代码');
+}
+
+function handleLogout() {
+    isAdmin = false;
+    currentUser = null;
+    currentFaction = null;
+    document.getElementById('loginContainer').style.display = 'flex';
+    document.getElementById('mainContainer').style.display = 'none';
+    document.getElementById('loginCode').value = '';
+}
+
+function showMainInterface() {
+    document.getElementById('loginContainer').style.display = 'none';
+    document.getElementById('mainContainer').style.display = 'block';
+    document.getElementById('currentUser').textContent = '当前用户：' + currentUser;
+    document.getElementById('currentYear').textContent = '年份：' + gameData.currentYear + '年';
+    document.getElementById('nextYearBtn').style.display = isAdmin ? 'inline-block' : 'none';
+    if (isAdmin) {
+        document.getElementById('adminView').style.display = 'block';
+        document.getElementById('playerView').style.display = 'none';
+        renderAdminView();
+    } else {
+        document.getElementById('adminView').style.display = 'none';
+        document.getElementById('playerView').style.display = 'block';
+        renderPlayerView();
+    }
+}
+
+function addOperationLog(operator, content) {
+    const log = { time: new Date().toLocaleString('zh-CN'), operator, content, snapshot: JSON.stringify(gameData) };
+    gameData.operationLogs.unshift(log);
+    if (gameData.operationLogs.length > 100) gameData.operationLogs = gameData.operationLogs.slice(0, 100);
+    saveData();
+}
+
+function copyShareLink() {
+    const url = window.location.href.split('?')[0];
+    navigator.clipboard.writeText(url).then(() => {
+        alert('联网链接已复制！\\n\\n将此链接发送给玩家，他们可以直接访问并输入势力代码登录。\\n\\n注意：数据存储在浏览器本地，如需多人共享数据，请使用导出/导入功能。');
+    }).catch(() => {
+        prompt('请复制以下链接：', url);
+    });
+}
+
+// ==================== 经济计算核心 ====================
+// 获取特产效果
+function getProductEffect(productName) {
+    return gameData.products[productName] || { koku: 0, horses: 0, soldiers: 0, kokuBonus: 0, effect: '' };
+}
+
+// 计算势力的领地石高（基础石高之和）
+function calcTerritoryKoku(factionId) {
+    return gameData.territories.filter(t => t.owner === factionId).reduce((sum, t) => sum + (t.baseKoku || 0), 0);
+}
+
+// 计算特产石高
+function calcProductKoku(factionId) {
+    let total = 0;
+    gameData.territories.filter(t => t.owner === factionId).forEach(t => {
+        [t.product1, t.product2, t.product3].forEach(p => {
+            if (p) total += getProductEffect(p).koku;
+        });
+    });
+    return total;
+}
+
+// 计算特产带来的额外士兵上限
+function calcProductSoldiers(factionId) {
+    let total = 0;
+    gameData.territories.filter(t => t.owner === factionId).forEach(t => {
+        [t.product1, t.product2, t.product3].forEach(p => {
+            if (p) total += getProductEffect(p).soldiers;
+        });
+    });
+    return total;
+}
+
+// 计算领内财产（整合奖励）
+function calcIntegrationBonus(factionId) {
+    let bonus = 0;
+    const ownedTerritories = gameData.territories.filter(t => t.owner === factionId);
+    const provinceMap = {};
+    
+    // 统计每个令制国的郡数量和基础石高
+    ownedTerritories.forEach(t => {
+        if (!provinceMap[t.province]) {
+            provinceMap[t.province] = { count: 0, baseKoku: 0 };
+        }
+        provinceMap[t.province].count++;
+        provinceMap[t.province].baseKoku += t.baseKoku || 0;
+    });
+    
+    // 检查是否完全占领（简化：假设每个令制国有固定郡数，这里用石高判断）
+    for (const prov in provinceMap) {
+        const provData = gameData.provinces[prov];
+        if (provData) {
+            // 如果占领的基础石高达到该国总石高的90%以上，视为完全占领
+            const allProvTerritories = gameData.territories.filter(t => t.province === prov);
+            const totalProvKoku = allProvTerritories.reduce((s, t) => s + (t.baseKoku || 0), 0);
+            if (provinceMap[prov].baseKoku >= totalProvKoku * 0.9 && totalProvKoku > 0) {
+                if (provData.koku >= 300000) bonus += 20000; // 30万石以上+2万
+                else if (provData.koku >= 150000) bonus += 10000; // 15-30万石+1万
+            }
+        }
+    }
+    return bonus;
+}
+
+// 获取士兵维持比区间效果
+function getSoldierRatioEffect(ratio) {
+    if (ratio <= 0.20) return { kokuBonus: 0.12, growth: 0.03, name: '休养生息' };
+    if (ratio <= 0.45) return { kokuBonus: 0.06, growth: 0.01, name: '正常发展' };
+    if (ratio <= 0.60) return { kokuBonus: 0, growth: -0.01, name: '普遍做法' };
+    if (ratio <= 0.80) return { kokuBonus: -0.10, growth: -0.02, name: '穷兵黩武' };
+    if (ratio <= 0.94) return { kokuBonus: -0.20, growth: -0.04, name: '暴君' };
+    return { kokuBonus: -0.30, growth: -0.08, name: '领地倒退' };
+}
+
+// 获取农业等级效果
+function getAgricultureEffect(points) {
+    if (points <= 0) return { level: 0, name: '荒废', growth: -0.01, kokuBonus: -0.05 };
+    if (points <= 15) return { level: 1, name: '开垦', growth: 0, kokuBonus: 0 };
+    if (points <= 30) return { level: 2, name: '井田', growth: 0.005, kokuBonus: 0 };
+    if (points <= 50) return { level: 3, name: '检地', growth: 0.01, kokuBonus: 0.02 };
+    if (points <= 70) return { level: 4, name: '治水', growth: 0.015, kokuBonus: 0.04 };
+    if (points <= 85) return { level: 5, name: '丰饶', growth: 0.02, kokuBonus: 0.06 };
+    if (points <= 99) return { level: 6, name: '天府', growth: 0.025, kokuBonus: 0.08 };
+    return { level: 7, name: '瑞穗', growth: 0.03, kokuBonus: 0.10 };
+}
+
+// 获取水军等级
+function getNavyLevel(points) {
+    if (points <= 10) return { level: 0, name: '纯纯渔船' };
+    if (points <= 20) return { level: 1, name: '小队水军' };
+    if (points <= 35) return { level: 2, name: '常规水军' };
+    if (points <= 50) return { level: 3, name: '大队水军' };
+    if (points <= 70) return { level: 4, name: '铁甲船' };
+    if (points <= 85) return { level: 5, name: '水上霸主' };
+    if (points <= 99) return { level: 6, name: '疾风怒涛' };
+    return { level: 7, name: '遮天蔽日' };
+}
+
+// 获取武备等级效果
+function getArmamentEffect(points) {
+    if (points <= 0) return { level: 0, name: '朽坏', maintBonus: 0.20 };
+    if (points <= 15) return { level: 1, name: '普通', maintBonus: 0 };
+    if (points <= 30) return { level: 2, name: '整修', maintBonus: -0.05 };
+    if (points <= 50) return { level: 3, name: '精良', maintBonus: -0.10 };
+    if (points <= 70) return { level: 4, name: '军械', maintBonus: -0.20 };
+    if (points <= 85) return { level: 5, name: '严整', maintBonus: -0.30 };
+    if (points <= 99) return { level: 6, name: '兵法', maintBonus: -0.40 };
+    return { level: 7, name: '武库', maintBonus: -0.50 };
+}
+
+// 计算势力完整经济数据
+function calcFactionEconomy(factionId) {
+    const f = gameData.factions[factionId];
+    if (!f) return null;
+    
+    const territoryKoku = calcTerritoryKoku(factionId);
+    const productKoku = calcProductKoku(factionId);
+    const integrationBonus = calcIntegrationBonus(factionId);
+    const industryKoku = f.industryKoku || 10000;
+    
+    // 计算士兵相关
+    const armySoldiers = gameData.armies.filter(a => a.faction === factionId).reduce((s, a) => s + a.soldiers, 0);
+    const totalSoldiers = (f.soldiers.idle || 0) + armySoldiers;
+    const productSoldiers = calcProductSoldiers(factionId);
+    
+    // 税率对应的招募系数
+    const taxRate = f.taxRate || 60;
+    let recruitCoef = 200;
+    if (taxRate <= 40) recruitCoef = 230;
+    else if (taxRate >= 80) recruitCoef = 180;
+    
+    const maxSoldiers = Math.floor(territoryKoku / 10000 * recruitCoef) + productSoldiers;
+    const soldierRatio = maxSoldiers > 0 ? totalSoldiers / maxSoldiers : 0;
+    const ratioEffect = getSoldierRatioEffect(soldierRatio);
+    const agriEffect = getAgricultureEffect(f.agriculture?.points || 0);
+    
+    // 加成系数 = 士兵维持比加成 + 农业加成
+    const bonusCoef = ratioEffect.kokuBonus + agriEffect.kokuBonus;
+    
+    // 表面石高
+    const surfaceKoku = Math.floor(territoryKoku * (1 + bonusCoef) + productKoku + integrationBonus + industryKoku);
+    
+    // 收入 = 表面石高 × 税率 × 0.4
+    const income = Math.floor(surfaceKoku * (taxRate / 100) * 0.4);
+    
+    // 维护费计算
+    const armamentEffect = getArmamentEffect(f.armament?.points || 0);
+    const maintMultiplier = 1 + armamentEffect.maintBonus;
+    
+    let totalGuns = f.arsenal.guns || 0;
+    let totalHorses = f.arsenal.horses || 0;
+    let totalCannons = f.arsenal.cannons || 0;
+    gameData.armies.filter(a => a.faction === factionId).forEach(a => {
+        totalGuns += a.guns || 0;
+        totalHorses += a.horses || 0;
+        totalCannons += a.cannons || 0;
+    });
+    
+    // 基础维护费
+    const soldierMaint = totalSoldiers * 4;
+    const horseMaint = Math.floor(totalHorses * 12 * maintMultiplier);
+    const gunMaint = Math.floor(totalGuns * 3 * maintMultiplier);
+    const cannonMaint = Math.floor(totalCannons * 8 * maintMultiplier);
+    const armyExtraMaint = armySoldiers * 4; // 军团额外费用
+    const samuraiMaint = (f.samurai?.length || 0) * 2000;
+    
+    const totalMaint = soldierMaint + horseMaint + gunMaint + cannonMaint + armyExtraMaint + samuraiMaint;
+    const netIncome = income - totalMaint;
+    
+    return {
+        territoryKoku,
+        productKoku,
+        integrationBonus,
+        industryKoku,
+        bonusCoef,
+        surfaceKoku,
+        taxRate,
+        income,
+        totalSoldiers,
+        maxSoldiers,
+        soldierRatio,
+        ratioEffect,
+        agriEffect,
+        armamentEffect,
+        totalMaint,
+        netIncome,
+        maintDetail: { soldierMaint, horseMaint, gunMaint, cannonMaint, armyExtraMaint, samuraiMaint }
+    };
+}
+
+// ==================== 回合结算 ====================
+function nextYear() {
+    if (!confirm('确定要进入下一年吗？\\n\\n将自动执行：\\n1. 根据士兵维持比更新所有郡国石高\\n2. 计算并发放年度收入\\n3. 扣除所有维护费用')) return;
+    
+    const results = [];
+    
+    for (const fid in gameData.factions) {
+        const f = gameData.factions[fid];
+        const eco = calcFactionEconomy(fid);
+        if (!eco) continue;
+        
+        // 计算自然增长率
+        const totalGrowth = eco.ratioEffect.growth + eco.agriEffect.growth;
+        
+        // 更新所有领地石高
+        gameData.territories.filter(t => t.owner === fid).forEach(t => {
+            const change = Math.floor((t.baseKoku || 0) * totalGrowth);
+            t.baseKoku = Math.max(1000, (t.baseKoku || 0) + change);
+        });
+        
+        // 发放收入，扣除维护费
+        const oldMoney = f.money || 0;
+        f.money = oldMoney + eco.netIncome;
+        
+        // 检查叛乱
+        if (eco.soldierRatio > 1) {
+            results.push(`【${f.name}】士兵维持比超过100%，触发叛乱！`);
+        }
+        
+        results.push(`【${f.name}】收入${eco.income}石，支出${eco.totalMaint}石，净收入${eco.netIncome}石，石高增长率${(totalGrowth * 100).toFixed(1)}%`);
+    }
+    
+    gameData.currentYear++;
+    document.getElementById('currentYear').textContent = '年份：' + gameData.currentYear + '年';
+    
+    addOperationLog('管理员', `执行年度结算，进入${gameData.currentYear}年`);
+    
+    alert('已进入 ' + gameData.currentYear + ' 年\\n\\n' + results.join('\\n'));
+    renderAdminView();
+}
+
+// ==================== 投资系统 ====================
+function doInvestment(factionId, type, samuraiName, targetCode) {
+    const f = gameData.factions[factionId];
+    if (!f) return { success: false, msg: '势力不存在' };
+    
+    const samurai = f.samurai.find(s => s.name === samuraiName);
+    if (!samurai) return { success: false, msg: '武士不存在' };
+    
+    let cost = 0, basePoints = 0, attr = 0;
+    
+    switch (type) {
+        case 'agriculture':
+            cost = 5000; basePoints = 5; attr = samurai.civil;
+            break;
+        case 'navy':
+            cost = 8000; basePoints = 4; attr = samurai.martial;
+            break;
+        case 'armament':
+            cost = 4000; basePoints = 6; attr = samurai.martial;
+            break;
+        default:
+            return { success: false, msg: '未知投资类型' };
+    }
+    
+    if ((f.money || 0) < cost) return { success: false, msg: '资金不足' };
+    
+    // 修正系数
+    const modifier = 1 + (attr - 70) * 0.01;
+    
+    // 成功率
+    let successRate = 50 + (attr - 70);
+    successRate = Math.max(5, Math.min(95, successRate));
+    
+    // D100判定
+    const roll = Math.floor(Math.random() * 100) + 1;
+    let multiplier = 0.5; // 失败
+    let resultType = '失败';
+    
+    if (roll < 5) {
+        multiplier = 1.5;
+        resultType = '大成功';
+    } else if (roll <= successRate) {
+        multiplier = 1.0;
+        resultType = '成功';
+    }
+    
+    const points = Math.round(basePoints * modifier * multiplier);
+    
+    // 扣除资金
+    f.money -= cost;
+    
+    // 增加点数
+    if (!f[type]) f[type] = { points: 0 };
+    f[type].points = Math.min(100, (f[type].points || 0) + points);
+    
+    saveData();
+    
+    return {
+        success: true,
+        resultType,
+        roll,
+        successRate,
+        points,
+        msg: `【${resultType}】投掷${roll}（成功率${successRate}%），获得${points}点`
+    };
+}
+
+function doCommerceInvestment(factionId, samuraiName, targetCode, investment) {
+    const f = gameData.factions[factionId];
+    if (!f) return { success: false, msg: '势力不存在' };
+    
+    const samurai = f.samurai.find(s => s.name === samuraiName);
+    if (!samurai) return { success: false, msg: '武士不存在' };
+    
+    const territory = gameData.territories.find(t => t.code === targetCode);
+    if (!territory) return { success: false, msg: '目标郡国不存在' };
+    
+    if ((f.money || 0) < investment) return { success: false, msg: '资金不足' };
+    
+    // 成功率 = (武士文治 - 50)% + (投入资金 / 1000)%
+    let successRate = (samurai.civil - 50) + Math.floor(investment / 1000);
+    successRate = Math.max(5, Math.min(95, successRate));
+    
+    const roll = Math.floor(Math.random() * 100) + 1;
+    const isSuccess = roll <= successRate;
+    
+    // 扣除资金
+    f.money -= investment;
+    
+    const hasProduct = territory.developableProduct && territory.developableProduct.trim() !== '';
+    
+    let msg = '';
+    if (hasProduct && isSuccess) {
+        // 情况B：有特产且成功
+        const productName = territory.developableProduct;
+        // 添加到特产列表
+        if (!territory.product1) territory.product1 = productName;
+        else if (!territory.product2) territory.product2 = productName;
+        else if (!territory.product3) territory.product3 = productName;
+        territory.developableProduct = '';
+        msg = `开发了特产【${productName}】，下月起开始产出收益！`;
+    } else if (hasProduct && !isSuccess) {
+        // 情况C：有特产但失败
+        msg = `似乎有关于【${territory.developableProduct}】的传闻，但投入资金不足，未能形成产业。`;
+    } else if (!hasProduct && isSuccess) {
+        // 情况A：无特产但成功
+        msg = '此地并无新商机。';
+    } else {
+        // 情况D：无特产且失败
+        msg = '没有打探到有价值的情报。';
+    }
+    
+    saveData();
+    return { success: true, roll, successRate, msg };
+}
+
+// ==================== 玩家视图 ====================
+function renderPlayerView() {
+    const f = gameData.factions[currentFaction];
+    if (!f) return;
+    
+    const eco = calcFactionEconomy(currentFaction);
+    const territories = gameData.territories.filter(t => t.owner === currentFaction);
+    const armies = gameData.armies.filter(a => a.faction === currentFaction);
+    const navyLevel = getNavyLevel(f.navy?.points || 0);
+    
+    document.getElementById('playerView').innerHTML = `
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">📜 势力信息</div>
+                <div class="card-body">
+                    <div class="info-item"><span class="label">势力名称</span><span class="value">${f.name}</span></div>
+                    <div class="info-item"><span class="label">家主</span><span class="value">${f.lord}</span></div>
+                    <div class="info-item"><span class="label">领地石高</span><span class="value">${eco.territoryKoku.toLocaleString()} 石</span></div>
+                    <div class="info-item"><span class="label">特产石高</span><span class="value">${eco.productKoku.toLocaleString()} 石</span></div>
+                    <div class="info-item"><span class="label">整合奖励</span><span class="value">${eco.integrationBonus.toLocaleString()} 石</span></div>
+                    <div class="info-item"><span class="label">产业石高</span><span class="value">${eco.industryKoku.toLocaleString()} 石</span></div>
+                    <div class="info-item"><span class="label">加成系数</span><span class="value">${(eco.bonusCoef * 100).toFixed(1)}%</span></div>
+                    <div class="info-item"><span class="label">表面石高</span><span class="value" style="font-weight:bold;color:var(--primary-color)">${eco.surfaceKoku.toLocaleString()} 石</span></div>
+                    <div class="info-item"><span class="label">税率</span><span class="value">${eco.taxRate}%</span></div>
+                    <div class="info-item"><span class="label">年收入</span><span class="value">${eco.income.toLocaleString()} 石</span></div>
+                    <div class="info-item"><span class="label">年支出</span><span class="value">${eco.totalMaint.toLocaleString()} 石</span></div>
+                    <div class="info-item"><span class="label">净收入</span><span class="value" style="color:${eco.netIncome >= 0 ? 'green' : 'red'}">${eco.netIncome >= 0 ? '+' : ''}${eco.netIncome.toLocaleString()} 石</span></div>
+                    <div class="info-item"><span class="label">现有资金</span><span class="value">${(f.money || 0).toLocaleString()} 石</span></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">⚔️ 军事与发展</div>
+                <div class="card-body">
+                    <div class="grid-2">
+                        <div>
+                            <h4 style="margin-bottom:8px;color:var(--primary-color)">武库</h4>
+                            <div class="info-item"><span class="label">🔫 铁炮</span><span class="value">${f.arsenal.guns}</span></div>
+                            <div class="info-item"><span class="label">🐴 战马</span><span class="value">${f.arsenal.horses}</span></div>
+                            <div class="info-item"><span class="label">💣 大筒</span><span class="value">${f.arsenal.cannons}</span></div>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom:8px;color:var(--primary-color)">士兵</h4>
+                            <div class="info-item"><span class="label">总兵力</span><span class="value">${eco.totalSoldiers}</span></div>
+                            <div class="info-item"><span class="label">闲置士兵</span><span class="value">${f.soldiers.idle || 0}</span></div>
+                            <div class="info-item"><span class="label">士兵上限</span><span class="value">${eco.maxSoldiers}</span></div>
+                            <div class="info-item"><span class="label">维持比</span><span class="value" style="color:${eco.soldierRatio > 0.6 ? 'red' : 'green'}">${(eco.soldierRatio * 100).toFixed(1)}% (${eco.ratioEffect.name})</span></div>
+                        </div>
+                    </div>
+                    <hr style="margin:15px 0;border-color:#eee">
+                    <div class="grid-2">
+                        <div>
+                            <div class="info-item"><span class="label">农业</span><span class="value"><span class="level-badge level-${eco.agriEffect.level}">${eco.agriEffect.name}</span></span></div>
+                            <div class="progress-bar"><div class="fill" style="width:${f.agriculture?.points || 0}%"></div></div>
+                        </div>
+                        <div>
+                            <div class="info-item"><span class="label">水军</span><span class="value"><span class="level-badge level-${navyLevel.level}">${navyLevel.name}</span></span></div>
+                            <div class="progress-bar"><div class="fill" style="width:${f.navy?.points || 0}%"></div></div>
+                        </div>
+                        <div>
+                            <div class="info-item"><span class="label">武备</span><span class="value"><span class="level-badge level-${eco.armamentEffect.level}">${eco.armamentEffect.name}</span></span></div>
+                            <div class="progress-bar"><div class="fill" style="width:${f.armament?.points || 0}%"></div></div>
+                        </div>
+                    </div>
+                    <div style="margin-top:15px">
+                        <button class="btn btn-primary" onclick="showRecruitModal()">招募士兵</button>
+                        <button class="btn btn-success" onclick="showCreateArmyModal()">建立军团</button>
+                        <button class="btn btn-warning" onclick="showBuyEquipModal()">购买装备</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">👤 上级武士</div>
+            <div class="card-body">
+                <div class="table-wrapper"><div class="table-scroll" style="max-height:200px">
+                    <table>
+                        <thead><tr><th style="width:25%">姓名</th><th style="width:15%">类型</th><th style="width:15%">武功</th><th style="width:15%">文治</th><th style="width:30%">状态</th></tr></thead>
+                        <tbody>${f.samurai.map(s => {
+                            const inArmy = armies.find(a => a.general === s.name);
+                            return `<tr><td>${s.name}</td><td>${s.type}</td><td>${s.martial}</td><td>${s.civil}</td><td>${inArmy ? '指挥' + inArmy.name : '闲置'}</td></tr>`;
+                        }).join('')}</tbody>
+                    </table>
+                </div></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">🏯 领地列表</div>
+            <div class="card-body">
+                <div class="table-wrapper"><div class="table-scroll">
+                    <table>
+                        <thead><tr><th style="width:8%">代码</th><th style="width:10%">令制国</th><th style="width:10%">郡名</th><th style="width:10%">城池</th><th style="width:5%">等级</th><th style="width:10%">基础石高</th><th style="width:10%">特产1</th><th style="width:10%">特产2</th><th style="width:10%">特产3</th><th style="width:10%">驻军</th></tr></thead>
+                        <tbody>${territories.map(t => `<tr>
+                            <td>${t.code}</td><td>${t.province}</td><td>${t.name}</td><td>${t.castle || '-'}</td><td>${t.castleLevel || '-'}</td>
+                            <td>${(t.baseKoku || 0).toLocaleString()}</td>
+                            <td>${t.product1 || '-'}</td><td>${t.product2 || '-'}</td><td>${t.product3 || '-'}</td>
+                            <td>${t.garrison || '-'}</td>
+                        </tr>`).join('')}</tbody>
+                    </table>
+                </div></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">🎌 军团编制</div>
+            <div class="card-body">
+                <div class="table-wrapper"><div class="table-scroll">
+                    <table>
+                        <thead><tr><th style="width:15%">军团名称</th><th style="width:12%">将领</th><th style="width:10%">人数</th><th style="width:8%">铁炮</th><th style="width:8%">战马</th><th style="width:8%">大筒</th><th style="width:15%">位置</th><th style="width:24%">操作</th></tr></thead>
+                        <tbody>${armies.map(a => `<tr>
+                            <td>${a.name}</td><td>${a.general}</td><td>${a.soldiers}</td><td>${a.guns}</td><td>${a.horses}</td><td>${a.cannons}</td><td>${a.location}</td>
+                            <td><button class="btn btn-primary" onclick="showArmyMenu(${a.id})">管理</button></td>
+                        </tr>`).join('')}</tbody>
+                    </table>
+                </div></div>
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">🤝 外交关系</div>
+                <div class="card-body">
+                    <div class="table-wrapper"><div class="table-scroll" style="max-height:200px">
+                        <table>
+                            <thead><tr><th style="width:50%">目标势力</th><th style="width:50%">关系</th></tr></thead>
+                            <tbody>${(f.diplomacy || []).map(d => `<tr><td>${d.target}</td><td style="color:${d.relation === '同盟' ? 'green' : d.relation === '敌对' ? 'red' : 'orange'}">${d.relation}</td></tr>`).join('')}</tbody>
+                        </table>
+                    </div></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">📊 支出明细</div>
+                <div class="card-body">
+                    <div class="info-item"><span class="label">士兵维护</span><span class="value">${eco.maintDetail.soldierMaint.toLocaleString()} 石</span></div>
+                    <div class="info-item"><span class="label">战马维护</span><span class="value">${eco.maintDetail.horseMaint.toLocaleString()} 石</span></div>
+                    <div class="info-item"><span class="label">铁炮维护</span><span class="value">${eco.maintDetail.gunMaint.toLocaleString()} 石</span></div>
+                    <div class="info-item"><span class="label">大筒维护</span><span class="value">${eco.maintDetail.cannonMaint.toLocaleString()} 石</span></div>
+                    <div class="info-item"><span class="label">军团出征费</span><span class="value">${eco.maintDetail.armyExtraMaint.toLocaleString()} 石</span></div>
+                    <div class="info-item"><span class="label">武士俸禄</span><span class="value">${eco.maintDetail.samuraiMaint.toLocaleString()} 石</span></div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ==================== 玩家操作 ====================
+function showRecruitModal() {
+    const f = gameData.factions[currentFaction];
+    const eco = calcFactionEconomy(currentFaction);
+    const canRecruit = Math.max(0, eco.maxSoldiers - eco.totalSoldiers);
+    
+    openModal('招募士兵', `
+        <p style="margin-bottom:15px">当前士兵上限：${eco.maxSoldiers}，已有：${eco.totalSoldiers}，可招募：${canRecruit}</p>
+        <div class="form-group">
+            <label>招募数量</label>
+            <div class="slider-group">
+                <input type="range" id="recruitSlider" min="0" max="${canRecruit}" value="0" oninput="document.getElementById('recruitInput').value=this.value">
+                <input type="number" id="recruitInput" min="0" max="${canRecruit}" value="0" oninput="syncSlider('recruitSlider',this.value,0,${canRecruit})">
+            </div>
+        </div>
+    `, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '确认招募', class: 'btn-success', action: 'confirmRecruit()' }
+    ]);
+}
+
+function confirmRecruit() {
+    const amount = parseInt(document.getElementById('recruitInput').value) || 0;
+    if (amount <= 0) { alert('请输入有效数量'); return; }
+    const f = gameData.factions[currentFaction];
+    f.soldiers.idle = (f.soldiers.idle || 0) + amount;
+    addOperationLog(f.name, `招募了 ${amount} 名士兵`);
+    closeModal();
+    renderPlayerView();
+}
+
+function showCreateArmyModal() {
+    const f = gameData.factions[currentFaction];
+    const territories = gameData.territories.filter(t => t.owner === currentFaction);
+    const busyGenerals = gameData.armies.filter(a => a.faction === currentFaction).map(a => a.general);
+    
+    openModal('建立军团', `
+        <div class="form-group" id="fg-name">
+            <label>军团名称（1-8个中文字符）</label>
+            <input type="text" id="newArmyName" maxlength="8">
+            <div class="error-msg">请输入1-8个中文字符</div>
+        </div>
+        <div class="form-group" id="fg-general">
+            <label>选择将领</label>
+            <select id="newArmyGeneral">
+                <option value="">-- 请选择 --</option>
+                ${f.samurai.map(s => `<option value="${s.name}" ${busyGenerals.includes(s.name) ? 'data-busy="1"' : ''}>${s.name}${busyGenerals.includes(s.name) ? ' [已任职]' : ''}</option>`).join('')}
+            </select>
+            <div class="error-msg">请选择将领</div>
+        </div>
+        <div class="form-group">
+            <label>军团人数（闲置：${f.soldiers.idle || 0}）</label>
+            <div class="slider-group">
+                <input type="range" id="newArmySoldiers" min="1" max="${f.soldiers.idle || 1}" value="1" oninput="document.getElementById('newArmySoldiersInput').value=this.value">
+                <input type="number" id="newArmySoldiersInput" min="1" max="${f.soldiers.idle || 1}" value="1" oninput="syncSlider('newArmySoldiers',this.value,1,${f.soldiers.idle || 1})">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>铁炮（库存：${f.arsenal.guns}）</label>
+            <div class="slider-group">
+                <input type="range" id="newArmyGuns" min="0" max="${f.arsenal.guns}" value="0" oninput="document.getElementById('newArmyGunsInput').value=this.value">
+                <input type="number" id="newArmyGunsInput" min="0" max="${f.arsenal.guns}" value="0" oninput="syncSlider('newArmyGuns',this.value,0,${f.arsenal.guns})">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>战马（库存：${f.arsenal.horses}）</label>
+            <div class="slider-group">
+                <input type="range" id="newArmyHorses" min="0" max="${f.arsenal.horses}" value="0" oninput="document.getElementById('newArmyHorsesInput').value=this.value">
+                <input type="number" id="newArmyHorsesInput" min="0" max="${f.arsenal.horses}" value="0" oninput="syncSlider('newArmyHorses',this.value,0,${f.arsenal.horses})">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>大筒（库存：${f.arsenal.cannons}）</label>
+            <div class="slider-group">
+                <input type="range" id="newArmyCannons" min="0" max="${f.arsenal.cannons}" value="0" oninput="document.getElementById('newArmyCannonsInput').value=this.value">
+                <input type="number" id="newArmyCannonsInput" min="0" max="${f.arsenal.cannons}" value="0" oninput="syncSlider('newArmyCannons',this.value,0,${f.arsenal.cannons})">
+            </div>
+        </div>
+        <div class="form-group" id="fg-location">
+            <label>创建位置</label>
+            <select id="newArmyLocation">
+                <option value="">-- 请选择 --</option>
+                ${territories.map(t => `<option value="${t.name}">${t.name}（${t.castle || '无城'}）</option>`).join('')}
+            </select>
+            <div class="error-msg">请选择位置</div>
+        </div>
+    `, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '清空', class: 'btn-warning', action: 'clearCreateArmyForm()' },
+        { text: '保存', class: 'btn-success', action: 'validateAndCreateArmy()' }
+    ]);
+}
+
+function clearCreateArmyForm() {
+    document.getElementById('newArmyName').value = '';
+    document.getElementById('newArmyGeneral').value = '';
+    document.getElementById('newArmySoldiers').value = 1;
+    document.getElementById('newArmySoldiersInput').value = 1;
+    document.getElementById('newArmyGuns').value = 0;
+    document.getElementById('newArmyGunsInput').value = 0;
+    document.getElementById('newArmyHorses').value = 0;
+    document.getElementById('newArmyHorsesInput').value = 0;
+    document.getElementById('newArmyCannons').value = 0;
+    document.getElementById('newArmyCannonsInput').value = 0;
+    document.getElementById('newArmyLocation').value = '';
+    ['fg-name', 'fg-general', 'fg-location'].forEach(id => document.getElementById(id).classList.remove('error'));
+}
+
+function validateAndCreateArmy() {
+    let valid = true;
+    const name = document.getElementById('newArmyName').value.trim();
+    if (!/^[\u4e00-\u9fa5]{1,8}$/.test(name)) {
+        document.getElementById('fg-name').classList.add('error');
+        valid = false;
+    } else {
+        document.getElementById('fg-name').classList.remove('error');
+    }
+    
+    const general = document.getElementById('newArmyGeneral').value;
+    if (!general) {
+        document.getElementById('fg-general').classList.add('error');
+        valid = false;
+    } else {
+        document.getElementById('fg-general').classList.remove('error');
+    }
+    
+    const location = document.getElementById('newArmyLocation').value;
+    if (!location) {
+        document.getElementById('fg-location').classList.add('error');
+        valid = false;
+    } else {
+        document.getElementById('fg-location').classList.remove('error');
+    }
+    
+    if (!valid) return;
+    
+    const existingArmy = gameData.armies.find(a => a.faction === currentFaction && a.general === general);
+    const data = {
+        name,
+        general,
+        soldiers: parseInt(document.getElementById('newArmySoldiersInput').value) || 1,
+        guns: parseInt(document.getElementById('newArmyGunsInput').value) || 0,
+        horses: parseInt(document.getElementById('newArmyHorsesInput').value) || 0,
+        cannons: parseInt(document.getElementById('newArmyCannonsInput').value) || 0,
+        location
+    };
+    
+    if (existingArmy) {
+        showGeneralConflict(general, existingArmy, data);
+    } else {
+        createArmy(data);
+    }
+}
+
+function showGeneralConflict(general, oldArmy, newData) {
+    openModal('将领冲突', `<p>是否将【${general}】从【${oldArmy.name}】调任为【${newData.name}】将领？</p>`, [
+        { text: '取消', class: 'btn-secondary', action: 'showCreateArmyModal()' },
+        { text: '确认', class: 'btn-success', action: `handleGeneralConflict('${general}',${oldArmy.id},${JSON.stringify(newData).replace(/"/g, '&quot;')})` }
+    ]);
+}
+
+function handleGeneralConflict(general, oldArmyId, newData) {
+    createArmy(newData);
+    const f = gameData.factions[currentFaction];
+    const oldArmy = gameData.armies.find(a => a.id === oldArmyId);
+    const busyGenerals = gameData.armies.filter(a => a.faction === currentFaction && a.id !== oldArmyId).map(a => a.general);
+    const idleSamurai = f.samurai.filter(s => !busyGenerals.includes(s.name) && s.name !== general);
+    
+    openModal('处理原军团', `
+        <p>【${oldArmy.name}】失去指挥官，请选择操作：</p>
+        ${idleSamurai.length > 0 ? `<div class="form-group"><label>指派新将领</label><select id="newGeneralForOld"><option value="">-- 选择 --</option>${idleSamurai.map(s => `<option value="${s.name}">${s.name}</option>`).join('')}</select></div>` : '<p style="color:#999">没有可用武士</p>'}
+    `, [
+        { text: '解散原军团', class: 'btn-danger', action: `disbandArmy(${oldArmyId})` },
+        ...(idleSamurai.length > 0 ? [{ text: '指派新将领', class: 'btn-success', action: `assignNewGeneral(${oldArmyId})` }] : [])
+    ]);
+}
+
+function assignNewGeneral(armyId) {
+    const newGeneral = document.getElementById('newGeneralForOld').value;
+    if (!newGeneral) { alert('请选择新将领'); return; }
+    const army = gameData.armies.find(a => a.id === armyId);
+    army.general = newGeneral;
+    addOperationLog(currentUser, `将【${newGeneral}】指派为【${army.name}】将领`);
+    closeModal();
+    renderPlayerView();
+}
+
+function createArmy(data) {
+    const f = gameData.factions[currentFaction];
+    const newArmy = {
+        id: gameData.nextArmyId++,
+        faction: currentFaction,
+        name: data.name,
+        general: data.general,
+        soldiers: data.soldiers,
+        guns: data.guns,
+        horses: data.horses,
+        cannons: data.cannons,
+        location: data.location
+    };
+    
+    f.soldiers.idle -= data.soldiers;
+    f.arsenal.guns -= data.guns;
+    f.arsenal.horses -= data.horses;
+    f.arsenal.cannons -= data.cannons;
+    
+    const territory = gameData.territories.find(t => t.name === data.location);
+    if (territory) territory.garrison = data.name;
+    
+    gameData.armies.push(newArmy);
+    addOperationLog(f.name, `建立军团【${data.name}】`);
+    closeModal();
+    renderPlayerView();
+}
+
+function showArmyMenu(armyId) {
+    const army = gameData.armies.find(a => a.id === armyId);
+    if (!army) return;
+    openModal('管理军团：' + army.name, `
+        <div class="info-item"><span class="label">将领</span><span class="value">${army.general}</span></div>
+        <div class="info-item"><span class="label">人数</span><span class="value">${army.soldiers}</span></div>
+        <div class="info-item"><span class="label">铁炮</span><span class="value">${army.guns}</span></div>
+        <div class="info-item"><span class="label">战马</span><span class="value">${army.horses}</span></div>
+        <div class="info-item"><span class="label">大筒</span><span class="value">${army.cannons}</span></div>
+        <div class="info-item"><span class="label">位置</span><span class="value">${army.location}</span></div>
+    `, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '编辑人数', class: 'btn-primary', action: `showEditSoldiers(${armyId})` },
+        { text: '编辑装备', class: 'btn-primary', action: `showEditEquip(${armyId})` },
+        { text: '解散军团', class: 'btn-danger', action: `confirmDisband(${armyId})` }
+    ]);
+}
+
+function showEditSoldiers(armyId) {
+    const army = gameData.armies.find(a => a.id === armyId);
+    const f = gameData.factions[currentFaction];
+    const max = army.soldiers + (f.soldiers.idle || 0);
+    openModal('编辑人数', `
+        <div class="form-group">
+            <label>军团人数（当前：${army.soldiers}，闲置：${f.soldiers.idle || 0}）</label>
+            <div class="slider-group">
+                <input type="range" id="editSoldiers" min="0" max="${max}" value="${army.soldiers}" oninput="document.getElementById('editSoldiersInput').value=this.value">
+                <input type="number" id="editSoldiersInput" min="0" max="${max}" value="${army.soldiers}" oninput="syncSlider('editSoldiers',this.value,0,${max})">
+            </div>
+        </div>
+    `, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '保存', class: 'btn-success', action: `saveEditSoldiers(${armyId})` }
+    ]);
+}
+
+function saveEditSoldiers(armyId) {
+    const army = gameData.armies.find(a => a.id === armyId);
+    const f = gameData.factions[currentFaction];
+    const newVal = parseInt(document.getElementById('editSoldiersInput').value) || 0;
+    if (newVal === 0) { if (confirm('人数为0将解散军团，确定？')) disbandArmy(armyId); return; }
+    const diff = newVal - army.soldiers;
+    f.soldiers.idle -= diff;
+    army.soldiers = newVal;
+    addOperationLog(f.name, `调整【${army.name}】人数为${newVal}`);
+    closeModal();
+    renderPlayerView();
+}
+
+function showEditEquip(armyId) {
+    const army = gameData.armies.find(a => a.id === armyId);
+    const f = gameData.factions[currentFaction];
+    const maxG = army.guns + f.arsenal.guns;
+    const maxH = army.horses + f.arsenal.horses;
+    const maxC = army.cannons + f.arsenal.cannons;
+    openModal('编辑装备', `
+        <div class="form-group"><label>铁炮（当前：${army.guns}，库存：${f.arsenal.guns}）</label>
+            <div class="slider-group"><input type="range" id="editGuns" min="0" max="${maxG}" value="${army.guns}" oninput="document.getElementById('editGunsInput').value=this.value"><input type="number" id="editGunsInput" min="0" max="${maxG}" value="${army.guns}" oninput="syncSlider('editGuns',this.value,0,${maxG})"></div></div>
+        <div class="form-group"><label>战马（当前：${army.horses}，库存：${f.arsenal.horses}）</label>
+            <div class="slider-group"><input type="range" id="editHorses" min="0" max="${maxH}" value="${army.horses}" oninput="document.getElementById('editHorsesInput').value=this.value"><input type="number" id="editHorsesInput" min="0" max="${maxH}" value="${army.horses}" oninput="syncSlider('editHorses',this.value,0,${maxH})"></div></div>
+        <div class="form-group"><label>大筒（当前：${army.cannons}，库存：${f.arsenal.cannons}）</label>
+            <div class="slider-group"><input type="range" id="editCannons" min="0" max="${maxC}" value="${army.cannons}" oninput="document.getElementById('editCannonsInput').value=this.value"><input type="number" id="editCannonsInput" min="0" max="${maxC}" value="${army.cannons}" oninput="syncSlider('editCannons',this.value,0,${maxC})"></div></div>
+    `, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '保存', class: 'btn-success', action: `saveEditEquip(${armyId})` }
+    ]);
+}
+
+function saveEditEquip(armyId) {
+    const army = gameData.armies.find(a => a.id === armyId);
+    const f = gameData.factions[currentFaction];
+    const newG = parseInt(document.getElementById('editGunsInput').value) || 0;
+    const newH = parseInt(document.getElementById('editHorsesInput').value) || 0;
+    const newC = parseInt(document.getElementById('editCannonsInput').value) || 0;
+    f.arsenal.guns -= (newG - army.guns);
+    f.arsenal.horses -= (newH - army.horses);
+    f.arsenal.cannons -= (newC - army.cannons);
+    army.guns = newG;
+    army.horses = newH;
+    army.cannons = newC;
+    addOperationLog(f.name, `调整【${army.name}】装备`);
+    closeModal();
+    renderPlayerView();
+}
+
+function confirmDisband(armyId) {
+    const army = gameData.armies.find(a => a.id === armyId);
+    openModal('确认解散', `<p>确定解散【${army.name}】？资源将返还库存。</p>`, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '确认', class: 'btn-danger', action: `disbandArmy(${armyId})` }
+    ]);
+}
+
+function disbandArmy(armyId) {
+    const army = gameData.armies.find(a => a.id === armyId);
+    if (!army) return;
+    const f = gameData.factions[army.faction];
+    f.soldiers.idle = (f.soldiers.idle || 0) + army.soldiers;
+    f.arsenal.guns += army.guns;
+    f.arsenal.horses += army.horses;
+    f.arsenal.cannons += army.cannons;
+    const territory = gameData.territories.find(t => t.garrison === army.name);
+    if (territory) territory.garrison = '';
+    gameData.armies = gameData.armies.filter(a => a.id !== armyId);
+    addOperationLog(f.name, `解散军团【${army.name}】`);
+    closeModal();
+    if (isAdmin) renderAdminArmies();
+    else renderPlayerView();
+}
+
+function showBuyEquipModal() {
+    const f = gameData.factions[currentFaction];
+    openModal('购买装备', `
+        <p style="margin-bottom:15px">当前资金：${(f.money || 0).toLocaleString()} 石</p>
+        <p style="margin-bottom:15px;font-size:12px;color:#666">价格：铁炮10石/挺，战马12石/匹，大筒450石/门</p>
+        <div class="form-group"><label>购买铁炮</label><input type="number" id="buyGuns" min="0" value="0"></div>
+        <div class="form-group"><label>购买战马</label><input type="number" id="buyHorses" min="0" value="0"></div>
+        <div class="form-group"><label>购买大筒</label><input type="number" id="buyCannons" min="0" value="0"></div>
+    `, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '购买', class: 'btn-success', action: 'confirmBuyEquip()' }
+    ]);
+}
+
+function confirmBuyEquip() {
+    const f = gameData.factions[currentFaction];
+    const guns = parseInt(document.getElementById('buyGuns').value) || 0;
+    const horses = parseInt(document.getElementById('buyHorses').value) || 0;
+    const cannons = parseInt(document.getElementById('buyCannons').value) || 0;
+    const cost = guns * 10 + horses * 12 + cannons * 450;
+    if (cost > (f.money || 0)) { alert('资金不足'); return; }
+    if (cost === 0) { alert('请输入购买数量'); return; }
+    f.money -= cost;
+    f.arsenal.guns += guns;
+    f.arsenal.horses += horses;
+    f.arsenal.cannons += cannons;
+    addOperationLog(f.name, `购买装备：铁炮${guns}，战马${horses}，大筒${cannons}，花费${cost}石`);
+    closeModal();
+    renderPlayerView();
+}
+
+// ==================== 管理员视图 ====================
+function renderAdminView() {
+    renderAdminTerritories();
+    renderAdminFactions();
+    renderAdminProducts();
+    renderAdminArmies();
+    renderAdminChronicle();
+    renderAdminInvestment();
+    renderAdminImport();
+    renderAdminLogs();
+    renderAdminBackup();
+}
+
+function switchAdminTab(tabName) {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('panel-' + tabName).classList.add('active');
+}
+
+// 郡国数据管理
+function renderAdminTerritories() {
+    const panel = document.getElementById('panel-territories');
+    panel.innerHTML = `
+        <div class="toolbar">
+            <button class="btn btn-success" onclick="showAddTerritoryModal()">新增领地</button>
+            <input type="text" id="territorySearch" placeholder="搜索..." oninput="filterTerritories()" style="width:150px">
+        </div>
+        <div class="table-wrapper"><div class="table-scroll" style="max-height:550px">
+            <table>
+                <thead><tr>
+                    <th style="width:6%">代码</th>
+                    <th style="width:7%">令制国</th>
+                    <th style="width:7%">郡名</th>
+                    <th style="width:7%">城池</th>
+                    <th style="width:4%">等级</th>
+                    <th style="width:7%">基础石高</th>
+                    <th style="width:6%">特产1</th>
+                    <th style="width:6%">特产2</th>
+                    <th style="width:6%">特产3</th>
+                    <th style="width:7%">可发展特产</th>
+                    <th style="width:7%">所属势力</th>
+                    <th style="width:7%">驻军</th>
+                    <th style="width:10%">简介</th>
+                    <th style="width:13%">操作</th>
+                </tr></thead>
+                <tbody id="territoriesList"></tbody>
+            </table>
+        </div></div>
+    `;
+    updateTerritoriesList();
+}
+
+function updateTerritoriesList() {
+    const search = (document.getElementById('territorySearch')?.value || '').toLowerCase();
+    const filtered = gameData.territories.filter(t => 
+        t.name.toLowerCase().includes(search) || t.province.toLowerCase().includes(search) || t.code.toLowerCase().includes(search)
+    );
+    document.getElementById('territoriesList').innerHTML = filtered.map(t => {
+        const owner = t.owner ? (gameData.factions[t.owner]?.name || '-') : '-';
+        const desc = t.description || '';
+        return `<tr>
+            <td>${t.code}</td>
+            <td>${t.province}</td>
+            <td>${t.name}</td>
+            <td>${t.castle || '-'}</td>
+            <td>${t.castleLevel || '-'}</td>
+            <td>${(t.baseKoku || 0).toLocaleString()}</td>
+            <td>${t.product1 || '-'}</td>
+            <td>${t.product2 || '-'}</td>
+            <td>${t.product3 || '-'}</td>
+            <td>${t.developableProduct || '-'}</td>
+            <td>${owner}</td>
+            <td>${t.garrison || '-'}</td>
+            <td title="${desc}">${desc.length > 8 ? desc.substring(0, 8) + '...' : (desc || '-')}</td>
+            <td>
+                <button class="btn btn-primary" onclick="showEditTerritoryModal('${t.code}')">编辑</button>
+                <button class="btn btn-danger" onclick="deleteTerritory('${t.code}')">删除</button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function filterTerritories() { updateTerritoriesList(); }
+
+function showAddTerritoryModal() {
+    openModal('新增领地', `
+        <div class="grid-2">
+            <div class="form-group"><label>郡国代码</label><input type="text" id="newTCode" placeholder="如RUXI01"></div>
+            <div class="form-group"><label>令制国</label><input type="text" id="newTProvince" placeholder="如若狭国"></div>
+            <div class="form-group"><label>郡名</label><input type="text" id="newTName"></div>
+            <div class="form-group"><label>城池名称</label><input type="text" id="newTCastle"></div>
+            <div class="form-group"><label>城池等级(1-7)</label><input type="number" id="newTCastleLevel" min="0" max="7" value="0"></div>
+            <div class="form-group"><label>基础石高</label><input type="number" id="newTKoku" value="10000"></div>
+            <div class="form-group"><label>特产1</label><select id="newTP1"><option value="">无</option>${Object.keys(gameData.products).map(p => `<option value="${p}">${p}</option>`).join('')}</select></div>
+            <div class="form-group"><label>特产2</label><select id="newTP2"><option value="">无</option>${Object.keys(gameData.products).map(p => `<option value="${p}">${p}</option>`).join('')}</select></div>
+            <div class="form-group"><label>特产3</label><select id="newTP3"><option value="">无</option>${Object.keys(gameData.products).map(p => `<option value="${p}">${p}</option>`).join('')}</select></div>
+            <div class="form-group"><label>可发展特产</label><select id="newTDevP"><option value="">无</option>${Object.keys(gameData.products).map(p => `<option value="${p}">${p}</option>`).join('')}</select></div>
+            <div class="form-group"><label>所属势力</label><select id="newTOwner"><option value="">无主</option>${Object.values(gameData.factions).map(f => `<option value="${f.id}">${f.name}</option>`).join('')}</select></div>
+            <div class="form-group"><label>驻扎军团</label><input type="text" id="newTGarrison"></div>
+        </div>
+        <div class="form-group"><label>简介</label><textarea id="newTDesc" rows="2"></textarea></div>
+    `, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '保存', class: 'btn-success', action: 'saveNewTerritory()' }
+    ]);
+}
+
+function saveNewTerritory() {
+    const code = document.getElementById('newTCode').value.trim();
+    const name = document.getElementById('newTName').value.trim();
+    if (!code || !name) { alert('请填写代码和郡名'); return; }
+    if (gameData.territories.find(t => t.code === code)) { alert('代码已存在'); return; }
+    gameData.territories.push({
+        code,
+        province: document.getElementById('newTProvince').value.trim(),
+        name,
+        castle: document.getElementById('newTCastle').value.trim(),
+        castleLevel: parseInt(document.getElementById('newTCastleLevel').value) || 0,
+        baseKoku: parseInt(document.getElementById('newTKoku').value) || 0,
+        product1: document.getElementById('newTP1').value,
+        product2: document.getElementById('newTP2').value,
+        product3: document.getElementById('newTP3').value,
+        developableProduct: document.getElementById('newTDevP').value,
+        owner: document.getElementById('newTOwner').value,
+        garrison: document.getElementById('newTGarrison').value.trim(),
+        description: document.getElementById('newTDesc').value.trim()
+    });
+    addOperationLog('管理员', `新增领地【${name}】`);
+    closeModal();
+    updateTerritoriesList();
+}
+
+function showEditTerritoryModal(code) {
+    const t = gameData.territories.find(ter => ter.code === code);
+    if (!t) return;
+    openModal('编辑领地', `
+        <div class="grid-2">
+            <div class="form-group"><label>郡国代码</label><input type="text" id="editTCode" value="${t.code}" readonly style="background:#eee"></div>
+            <div class="form-group"><label>令制国</label><input type="text" id="editTProvince" value="${t.province || ''}"></div>
+            <div class="form-group"><label>郡名</label><input type="text" id="editTName" value="${t.name}"></div>
+            <div class="form-group"><label>城池名称</label><input type="text" id="editTCastle" value="${t.castle || ''}"></div>
+            <div class="form-group"><label>城池等级(1-7)</label><input type="number" id="editTCastleLevel" min="0" max="7" value="${t.castleLevel || 0}"></div>
+            <div class="form-group"><label>基础石高</label><input type="number" id="editTKoku" value="${t.baseKoku || 0}"></div>
+            <div class="form-group"><label>特产1</label><select id="editTP1"><option value="">无</option>${Object.keys(gameData.products).map(p => `<option value="${p}" ${t.product1 === p ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+            <div class="form-group"><label>特产2</label><select id="editTP2"><option value="">无</option>${Object.keys(gameData.products).map(p => `<option value="${p}" ${t.product2 === p ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+            <div class="form-group"><label>特产3</label><select id="editTP3"><option value="">无</option>${Object.keys(gameData.products).map(p => `<option value="${p}" ${t.product3 === p ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+            <div class="form-group"><label>可发展特产</label><select id="editTDevP"><option value="">无</option>${Object.keys(gameData.products).map(p => `<option value="${p}" ${t.developableProduct === p ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+            <div class="form-group"><label>所属势力</label><select id="editTOwner"><option value="">无主</option>${Object.values(gameData.factions).map(f => `<option value="${f.id}" ${t.owner === f.id ? 'selected' : ''}>${f.name}</option>`).join('')}</select></div>
+            <div class="form-group"><label>驻扎军团</label><input type="text" id="editTGarrison" value="${t.garrison || ''}"></div>
+        </div>
+        <div class="form-group"><label>简介</label><textarea id="editTDesc" rows="2">${t.description || ''}</textarea></div>
+    `, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '保存', class: 'btn-success', action: `saveEditTerritory('${code}')` }
+    ]);
+}
+
+function saveEditTerritory(code) {
+    const t = gameData.territories.find(ter => ter.code === code);
+    if (!t) return;
+    t.province = document.getElementById('editTProvince').value.trim();
+    t.name = document.getElementById('editTName').value.trim();
+    t.castle = document.getElementById('editTCastle').value.trim();
+    t.castleLevel = parseInt(document.getElementById('editTCastleLevel').value) || 0;
+    t.baseKoku = parseInt(document.getElementById('editTKoku').value) || 0;
+    t.product1 = document.getElementById('editTP1').value;
+    t.product2 = document.getElementById('editTP2').value;
+    t.product3 = document.getElementById('editTP3').value;
+    t.developableProduct = document.getElementById('editTDevP').value;
+    t.owner = document.getElementById('editTOwner').value;
+    t.garrison = document.getElementById('editTGarrison').value.trim();
+    t.description = document.getElementById('editTDesc').value.trim();
+    addOperationLog('管理员', `编辑领地【${t.name}】`);
+    closeModal();
+    updateTerritoriesList();
+}
+
+function deleteTerritory(code) {
+    if (!confirm('确定删除？')) return;
+    const idx = gameData.territories.findIndex(t => t.code === code);
+    if (idx > -1) {
+        const name = gameData.territories[idx].name;
+        gameData.territories.splice(idx, 1);
+        addOperationLog('管理员', `删除领地【${name}】`);
+        updateTerritoriesList();
+    }
+}
+
+// 特产对照表
+function renderAdminProducts() {
+    const panel = document.getElementById('panel-products');
+    panel.innerHTML = `
+        <div class="toolbar">
+            <button class="btn btn-success" onclick="showAddProductModal()">新增特产</button>
+        </div>
+        <div class="table-wrapper"><div class="table-scroll" style="max-height:500px">
+            <table>
+                <thead><tr>
+                    <th style="width:15%">特产名称</th>
+                    <th style="width:12%">每年石高</th>
+                    <th style="width:12%">每年战马</th>
+                    <th style="width:12%">士兵上限</th>
+                    <th style="width:12%">石高加成%</th>
+                    <th style="width:22%">其他效果</th>
+                    <th style="width:15%">操作</th>
+                </tr></thead>
+                <tbody id="productsList"></tbody>
+            </table>
+        </div></div>
+    `;
+    updateProductsList();
+}
+
+function updateProductsList() {
+    document.getElementById('productsList').innerHTML = Object.values(gameData.products).map(p => `<tr>
+        <td>${p.name}</td>
+        <td>${p.koku}</td>
+        <td>${p.horses}</td>
+        <td>${p.soldiers}</td>
+        <td>${p.kokuBonus}%</td>
+        <td>${p.effect || '-'}</td>
+        <td>
+            <button class="btn btn-primary" onclick="showEditProductModal('${p.name}')">编辑</button>
+            <button class="btn btn-danger" onclick="deleteProduct('${p.name}')">删除</button>
+        </td>
+    </tr>`).join('');
+}
+
+function showAddProductModal() {
+    openModal('新增特产', `
+        <div class="form-group"><label>特产名称</label><input type="text" id="newProdName"></div>
+        <div class="grid-2">
+            <div class="form-group"><label>每年石高</label><input type="number" id="newProdKoku" value="0"></div>
+            <div class="form-group"><label>每年战马</label><input type="number" id="newProdHorses" value="0"></div>
+            <div class="form-group"><label>士兵上限增加</label><input type="number" id="newProdSoldiers" value="0"></div>
+            <div class="form-group"><label>石高加成(%)</label><input type="number" id="newProdBonus" value="0"></div>
+        </div>
+        <div class="form-group"><label>其他效果</label><input type="text" id="newProdEffect"></div>
+    `, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '保存', class: 'btn-success', action: 'saveNewProduct()' }
+    ]);
+}
+
+function saveNewProduct() {
+    const name = document.getElementById('newProdName').value.trim();
+    if (!name) { alert('请输入名称'); return; }
+    if (gameData.products[name]) { alert('该特产已存在'); return; }
+    gameData.products[name] = {
+        name,
+        koku: parseInt(document.getElementById('newProdKoku').value) || 0,
+        horses: parseInt(document.getElementById('newProdHorses').value) || 0,
+        soldiers: parseInt(document.getElementById('newProdSoldiers').value) || 0,
+        kokuBonus: parseInt(document.getElementById('newProdBonus').value) || 0,
+        effect: document.getElementById('newProdEffect').value.trim()
+    };
+    addOperationLog('管理员', `新增特产【${name}】`);
+    closeModal();
+    updateProductsList();
+}
+
+function showEditProductModal(name) {
+    const p = gameData.products[name];
+    if (!p) return;
+    openModal('编辑特产', `
+        <div class="form-group"><label>特产名称</label><input type="text" value="${p.name}" readonly style="background:#eee"></div>
+        <div class="grid-2">
+            <div class="form-group"><label>每年石高</label><input type="number" id="editProdKoku" value="${p.koku}"></div>
+            <div class="form-group"><label>每年战马</label><input type="number" id="editProdHorses" value="${p.horses}"></div>
+            <div class="form-group"><label>士兵上限增加</label><input type="number" id="editProdSoldiers" value="${p.soldiers}"></div>
+            <div class="form-group"><label>石高加成(%)</label><input type="number" id="editProdBonus" value="${p.kokuBonus}"></div>
+        </div>
+        <div class="form-group"><label>其他效果</label><input type="text" id="editProdEffect" value="${p.effect || ''}"></div>
+    `, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '保存', class: 'btn-success', action: `saveEditProduct('${name}')` }
+    ]);
+}
+
+function saveEditProduct(name) {
+    const p = gameData.products[name];
+    if (!p) return;
+    p.koku = parseInt(document.getElementById('editProdKoku').value) || 0;
+    p.horses = parseInt(document.getElementById('editProdHorses').value) || 0;
+    p.soldiers = parseInt(document.getElementById('editProdSoldiers').value) || 0;
+    p.kokuBonus = parseInt(document.getElementById('editProdBonus').value) || 0;
+    p.effect = document.getElementById('editProdEffect').value.trim();
+    addOperationLog('管理员', `编辑特产【${name}】`);
+    closeModal();
+    updateProductsList();
+}
+
+function deleteProduct(name) {
+    if (!confirm('确定删除？')) return;
+    delete gameData.products[name];
+    addOperationLog('管理员', `删除特产【${name}】`);
+    updateProductsList();
+}
+
+// 势力管理
+function renderAdminFactions() {
+    const panel = document.getElementById('panel-factions');
+    panel.innerHTML = `
+        <div class="toolbar">
+            <button class="btn btn-success" onclick="showAddFactionModal()">新增势力</button>
+        </div>
+        <div class="table-wrapper"><div class="table-scroll" style="max-height:500px">
+            <table>
+                <thead><tr>
+                    <th style="width:8%">ID</th>
+                    <th style="width:10%">名称</th>
+                    <th style="width:10%">家主</th>
+                    <th style="width:8%">代码</th>
+                    <th style="width:8%">税率</th>
+                    <th style="width:10%">资金</th>
+                    <th style="width:8%">农业</th>
+                    <th style="width:8%">水军</th>
+                    <th style="width:8%">武备</th>
+                    <th style="width:22%">操作</th>
+                </tr></thead>
+                <tbody id="factionsList"></tbody>
+            </table>
+        </div></div>
+    `;
+    updateFactionsList();
+}
+
+function updateFactionsList() {
+    document.getElementById('factionsList').innerHTML = Object.values(gameData.factions).map(f => {
+        const agri = getAgricultureEffect(f.agriculture?.points || 0);
+        const navy = getNavyLevel(f.navy?.points || 0);
+        const arma = getArmamentEffect(f.armament?.points || 0);
+        return `<tr>
+            <td>${f.id}</td>
+            <td>${f.name}</td>
+            <td>${f.lord}</td>
+            <td><code>${f.code}</code></td>
+            <td>${f.taxRate || 60}%</td>
+            <td>${(f.money || 0).toLocaleString()}</td>
+            <td><span class="level-badge level-${agri.level}">${agri.name}</span></td>
+            <td><span class="level-badge level-${navy.level}">${navy.name}</span></td>
+            <td><span class="level-badge level-${arma.level}">${arma.name}</span></td>
+            <td>
+                <button class="btn btn-primary" onclick="showEditFactionModal('${f.id}')">编辑</button>
+                <button class="btn btn-warning" onclick="showFactionDetailModal('${f.id}')">详细</button>
+                <button class="btn btn-danger" onclick="deleteFaction('${f.id}')">删除</button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function showAddFactionModal() {
+    openModal('新增势力', `
+        <div class="grid-2">
+            <div class="form-group"><label>势力ID</label><input type="text" id="newFId"></div>
+            <div class="form-group"><label>势力名称</label><input type="text" id="newFName"></div>
+            <div class="form-group"><label>家主</label><input type="text" id="newFLord"></div>
+            <div class="form-group"><label>登录代码</label><input type="text" id="newFCode"></div>
+            <div class="form-group"><label>税率(%)</label><input type="number" id="newFTax" value="60" min="40" max="80"></div>
+            <div class="form-group"><label>产业石高</label><input type="number" id="newFIndustry" value="10000"></div>
+        </div>
+    `, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '保存', class: 'btn-success', action: 'saveNewFaction()' }
+    ]);
+}
+
+function saveNewFaction() {
+    const id = document.getElementById('newFId').value.trim();
+    const name = document.getElementById('newFName').value.trim();
+    const code = document.getElementById('newFCode').value.trim();
+    if (!id || !name || !code) { alert('请填写完整'); return; }
+    if (gameData.factions[id]) { alert('ID已存在'); return; }
+    gameData.factions[id] = {
+        id, name, lord: document.getElementById('newFLord').value.trim(), code,
+        taxRate: parseInt(document.getElementById('newFTax').value) || 60,
+        industryKoku: parseInt(document.getElementById('newFIndustry').value) || 10000,
+        agriculture: { points: 15 }, commerce: { points: 0 }, navy: { points: 10 }, armament: { points: 15 },
+        arsenal: { guns: 0, horses: 0, cannons: 0 },
+        soldiers: { idle: 0, total: 0 },
+        money: 0, buffs: [], samurai: [], diplomacy: []
+    };
+    addOperationLog('管理员', `新增势力【${name}】`);
+    closeModal();
+    updateFactionsList();
+}
+
+function showEditFactionModal(fid) {
+    const f = gameData.factions[fid];
+    if (!f) return;
+    openModal('编辑势力', `
+        <div class="grid-2">
+            <div class="form-group"><label>势力ID</label><input type="text" value="${f.id}" readonly style="background:#eee"></div>
+            <div class="form-group"><label>势力名称</label><input type="text" id="editFName" value="${f.name}"></div>
+            <div class="form-group"><label>家主</label><input type="text" id="editFLord" value="${f.lord}"></div>
+            <div class="form-group"><label>登录代码</label><input type="text" id="editFCode" value="${f.code}"></div>
+            <div class="form-group"><label>税率(%)</label><input type="number" id="editFTax" value="${f.taxRate || 60}" min="40" max="80"></div>
+            <div class="form-group"><label>产业石高</label><input type="number" id="editFIndustry" value="${f.industryKoku || 10000}"></div>
+            <div class="form-group"><label>资金</label><input type="number" id="editFMoney" value="${f.money || 0}"></div>
+        </div>
+    `, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '保存', class: 'btn-success', action: `saveEditFaction('${fid}')` }
+    ]);
+}
+
+function saveEditFaction(fid) {
+    const f = gameData.factions[fid];
+    if (!f) return;
+    f.name = document.getElementById('editFName').value.trim();
+    f.lord = document.getElementById('editFLord').value.trim();
+    f.code = document.getElementById('editFCode').value.trim();
+    f.taxRate = parseInt(document.getElementById('editFTax').value) || 60;
+    f.industryKoku = parseInt(document.getElementById('editFIndustry').value) || 10000;
+    f.money = parseInt(document.getElementById('editFMoney').value) || 0;
+    addOperationLog('管理员', `编辑势力【${f.name}】`);
+    closeModal();
+    updateFactionsList();
+}
+
+function showFactionDetailModal(fid) {
+    const f = gameData.factions[fid];
+    if (!f) return;
+    openModal('势力详情：' + f.name, `
+        <h4 style="margin-bottom:10px;color:var(--primary-color)">武库</h4>
+        <div class="grid-3">
+            <div class="form-group"><label>铁炮</label><input type="number" id="detailGuns" value="${f.arsenal.guns}"></div>
+            <div class="form-group"><label>战马</label><input type="number" id="detailHorses" value="${f.arsenal.horses}"></div>
+            <div class="form-group"><label>大筒</label><input type="number" id="detailCannons" value="${f.arsenal.cannons}"></div>
+        </div>
+        <h4 style="margin:15px 0 10px;color:var(--primary-color)">士兵</h4>
+        <div class="form-group"><label>闲置士兵</label><input type="number" id="detailIdle" value="${f.soldiers.idle || 0}"></div>
+        <h4 style="margin:15px 0 10px;color:var(--primary-color)">发展点数</h4>
+        <div class="grid-3">
+            <div class="form-group"><label>农业(0-100)</label><input type="number" id="detailAgri" value="${f.agriculture?.points || 0}" min="0" max="100"></div>
+            <div class="form-group"><label>水军(0-100)</label><input type="number" id="detailNavy" value="${f.navy?.points || 0}" min="0" max="100"></div>
+            <div class="form-group"><label>武备(0-100)</label><input type="number" id="detailArma" value="${f.armament?.points || 0}" min="0" max="100"></div>
+        </div>
+        <h4 style="margin:15px 0 10px;color:var(--primary-color)">上级武士</h4>
+        <div id="samuraiListDetail">${f.samurai.map((s, i) => `<div class="info-item"><span>${s.name}(${s.type}) 武${s.martial}/文${s.civil}</span><button class="btn btn-danger" onclick="removeSamurai('${fid}',${i})">删</button></div>`).join('')}</div>
+        <button class="btn btn-success" onclick="showAddSamuraiModal('${fid}')" style="margin-top:10px">添加武士</button>
+    `, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '保存', class: 'btn-success', action: `saveFactionDetail('${fid}')` }
+    ]);
+}
+
+function saveFactionDetail(fid) {
+    const f = gameData.factions[fid];
+    if (!f) return;
+    f.arsenal.guns = parseInt(document.getElementById('detailGuns').value) || 0;
+    f.arsenal.horses = parseInt(document.getElementById('detailHorses').value) || 0;
+    f.arsenal.cannons = parseInt(document.getElementById('detailCannons').value) || 0;
+    f.soldiers.idle = parseInt(document.getElementById('detailIdle').value) || 0;
+    if (!f.agriculture) f.agriculture = { points: 0 };
+    if (!f.navy) f.navy = { points: 0 };
+    if (!f.armament) f.armament = { points: 0 };
+    f.agriculture.points = Math.min(100, Math.max(0, parseInt(document.getElementById('detailAgri').value) || 0));
+    f.navy.points = Math.min(100, Math.max(0, parseInt(document.getElementById('detailNavy').value) || 0));
+    f.armament.points = Math.min(100, Math.max(0, parseInt(document.getElementById('detailArma').value) || 0));
+    addOperationLog('管理员', `编辑势力【${f.name}】详情`);
+    closeModal();
+    updateFactionsList();
+}
+
+function showAddSamuraiModal(fid) {
+    openModal('添加武士', `
+        <div class="form-group"><label>姓名</label><input type="text" id="newSamName"></div>
+        <div class="form-group"><label>类型</label><select id="newSamType"><option>猛将</option><option>智将</option><option>勇将</option><option>儒将</option></select></div>
+        <div class="grid-2">
+            <div class="form-group"><label>武功</label><input type="number" id="newSamMartial" value="50" min="0" max="100"></div>
+            <div class="form-group"><label>文治</label><input type="number" id="newSamCivil" value="50" min="0" max="100"></div>
+        </div>
+    `, [
+        { text: '取消', class: 'btn-secondary', action: `showFactionDetailModal('${fid}')` },
+        { text: '添加', class: 'btn-success', action: `addSamurai('${fid}')` }
+    ]);
+}
+
+function addSamurai(fid) {
+    const f = gameData.factions[fid];
+    const name = document.getElementById('newSamName').value.trim();
+    if (!name) { alert('请输入姓名'); return; }
+    f.samurai.push({
+        name,
+        type: document.getElementById('newSamType').value,
+        martial: parseInt(document.getElementById('newSamMartial').value) || 50,
+        civil: parseInt(document.getElementById('newSamCivil').value) || 50
+    });
+    addOperationLog('管理员', `为【${f.name}】添加武士【${name}】`);
+    showFactionDetailModal(fid);
+}
+
+function removeSamurai(fid, idx) {
+    const f = gameData.factions[fid];
+    const name = f.samurai[idx].name;
+    f.samurai.splice(idx, 1);
+    addOperationLog('管理员', `从【${f.name}】移除武士【${name}】`);
+    showFactionDetailModal(fid);
+}
+
+function deleteFaction(fid) {
+    if (!confirm('确定删除？')) return;
+    const name = gameData.factions[fid].name;
+    gameData.territories.forEach(t => { if (t.owner === fid) { t.owner = ''; t.garrison = ''; } });
+    gameData.armies = gameData.armies.filter(a => a.faction !== fid);
+    delete gameData.factions[fid];
+    addOperationLog('管理员', `删除势力【${name}】`);
+    updateFactionsList();
+}
+
+// 全军团一览
+function renderAdminArmies() {
+    const panel = document.getElementById('panel-armies');
+    panel.innerHTML = `
+        <div class="toolbar">
+            <input type="text" id="armySearch" placeholder="搜索..." oninput="filterArmies()" style="width:150px">
+        </div>
+        <div class="table-wrapper"><div class="table-scroll" style="max-height:550px">
+            <table>
+                <thead><tr>
+                    <th style="width:10%">所属势力</th>
+                    <th style="width:12%">军团名称</th>
+                    <th style="width:10%">将领</th>
+                    <th style="width:8%">人数</th>
+                    <th style="width:8%">铁炮</th>
+                    <th style="width:8%">战马</th>
+                    <th style="width:8%">大筒</th>
+                    <th style="width:12%">位置</th>
+                    <th style="width:24%">操作</th>
+                </tr></thead>
+                <tbody id="armiesList"></tbody>
+            </table>
+        </div></div>
+    `;
+    updateArmiesList();
+}
+
+function updateArmiesList() {
+    const search = (document.getElementById('armySearch')?.value || '').toLowerCase();
+    const filtered = gameData.armies.filter(a => {
+        const fn = gameData.factions[a.faction]?.name || '';
+        return a.name.toLowerCase().includes(search) || a.general.toLowerCase().includes(search) || fn.toLowerCase().includes(search);
+    });
+    document.getElementById('armiesList').innerHTML = filtered.map(a => {
+        const fn = gameData.factions[a.faction]?.name || '-';
+        return `<tr>
+            <td>${fn}</td>
+            <td>${a.name}</td>
+            <td>${a.general}</td>
+            <td>${a.soldiers}</td>
+            <td>${a.guns}</td>
+            <td>${a.horses}</td>
+            <td>${a.cannons}</td>
+            <td>${a.location}</td>
+            <td>
+                <button class="btn btn-primary" onclick="showAdminEditArmy(${a.id})">编辑</button>
+                <button class="btn btn-danger" onclick="adminDeleteArmy(${a.id})">删除</button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function filterArmies() { updateArmiesList(); }
+
+function showAdminEditArmy(armyId) {
+    const a = gameData.armies.find(army => army.id === armyId);
+    if (!a) return;
+    openModal('编辑军团', `
+        <div class="grid-2">
+            <div class="form-group"><label>军团名称</label><input type="text" id="adminArmyName" value="${a.name}"></div>
+            <div class="form-group"><label>将领</label><input type="text" id="adminArmyGeneral" value="${a.general}"></div>
+            <div class="form-group"><label>人数</label><input type="number" id="adminArmySoldiers" value="${a.soldiers}"></div>
+            <div class="form-group"><label>铁炮</label><input type="number" id="adminArmyGuns" value="${a.guns}"></div>
+            <div class="form-group"><label>战马</label><input type="number" id="adminArmyHorses" value="${a.horses}"></div>
+            <div class="form-group"><label>大筒</label><input type="number" id="adminArmyCannons" value="${a.cannons}"></div>
+            <div class="form-group"><label>位置</label><input type="text" id="adminArmyLocation" value="${a.location}"></div>
+        </div>
+    `, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '保存', class: 'btn-success', action: `saveAdminEditArmy(${armyId})` }
+    ]);
+}
+
+function saveAdminEditArmy(armyId) {
+    const a = gameData.armies.find(army => army.id === armyId);
+    if (!a) return;
+    a.name = document.getElementById('adminArmyName').value.trim();
+    a.general = document.getElementById('adminArmyGeneral').value.trim();
+    a.soldiers = parseInt(document.getElementById('adminArmySoldiers').value) || 0;
+    a.guns = parseInt(document.getElementById('adminArmyGuns').value) || 0;
+    a.horses = parseInt(document.getElementById('adminArmyHorses').value) || 0;
+    a.cannons = parseInt(document.getElementById('adminArmyCannons').value) || 0;
+    a.location = document.getElementById('adminArmyLocation').value.trim();
+    addOperationLog('管理员', `编辑军团【${a.name}】`);
+    closeModal();
+    updateArmiesList();
+}
+
+function adminDeleteArmy(armyId) {
+    if (!confirm('确定删除？')) return;
+    disbandArmy(armyId);
+}
+
+// 记账与推演
+function renderAdminChronicle() {
+    const panel = document.getElementById('panel-chronicle');
+    panel.innerHTML = `
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">📝 录入</div>
+                <div class="card-body">
+                    <div class="form-group"><label>年份</label><input type="number" id="chronicleYear" value="${gameData.currentYear}"></div>
+                    <div class="form-group"><label>势力</label><select id="chronicleFaction"><option value="">--选择--</option>${Object.values(gameData.factions).map(f => `<option value="${f.name}">${f.name}</option>`).join('')}<option value="全局">全局事件</option></select></div>
+                    <div class="form-group"><label>内容</label><textarea id="chronicleContent" rows="3"></textarea></div>
+                    <div class="form-group"><label><input type="checkbox" id="chronicleCalc"> 涉及数值变动</label></div>
+                    <button class="btn btn-success" onclick="saveChronicle()">保存</button>
+                    <button class="btn btn-secondary" onclick="clearChronicleForm()">清空</button>
+                    <button class="btn btn-primary" onclick="updateGlobalYear()">更新年份</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">📅 推演日志</div>
+                <div class="card-body">
+                    <div class="toolbar">
+                        <input type="text" id="chronicleFilterYear" placeholder="年份" style="width:80px">
+                        <input type="text" id="chronicleFilterFaction" placeholder="势力" style="width:80px">
+                        <button class="btn btn-primary" onclick="filterChronicles()">筛选</button>
+                    </div>
+                    <div class="table-wrapper"><div class="table-scroll" style="max-height:300px">
+                        <table>
+                            <thead><tr><th style="width:15%">年份</th><th style="width:20%">势力</th><th style="width:45%">内容</th><th style="width:20%">操作</th></tr></thead>
+                            <tbody id="chroniclesList"></tbody>
+                        </table>
+                    </div></div>
+                </div>
+            </div>
+        </div>
+    `;
+    updateChroniclesList();
+}
+
+function updateChroniclesList() {
+    const yf = document.getElementById('chronicleFilterYear')?.value || '';
+    const ff = document.getElementById('chronicleFilterFaction')?.value || '';
+    let list = gameData.chronicles;
+    if (yf) list = list.filter(c => c.year.toString().includes(yf));
+    if (ff) list = list.filter(c => c.faction.includes(ff));
+    document.getElementById('chroniclesList').innerHTML = list.map(c => `<tr>
+        <td>${c.year}</td>
+        <td>${c.faction}</td>
+        <td title="${c.content}">${c.content.length > 20 ? c.content.substring(0, 20) + '...' : c.content}</td>
+        <td><button class="btn btn-danger" onclick="deleteChronicle(${c.id})">删除</button></td>
+    </tr>`).join('');
+}
+
+function saveChronicle() {
+    const content = document.getElementById('chronicleContent').value.trim();
+    if (!content) { alert('请输入内容'); return; }
+    gameData.chronicles.unshift({
+        id: gameData.nextChronicleId++,
+        year: parseInt(document.getElementById('chronicleYear').value) || gameData.currentYear,
+        faction: document.getElementById('chronicleFaction').value || '未指定',
+        content,
+        calculated: document.getElementById('chronicleCalc').checked
+    });
+    addOperationLog('管理员', `添加推演记录`);
+    clearChronicleForm();
+    updateChroniclesList();
+}
+
+function clearChronicleForm() {
+    document.getElementById('chronicleFaction').value = '';
+    document.getElementById('chronicleContent').value = '';
+    document.getElementById('chronicleCalc').checked = false;
+}
+
+function updateGlobalYear() {
+    const year = parseInt(document.getElementById('chronicleYear').value);
+    if (year) {
+        gameData.currentYear = year;
+        document.getElementById('currentYear').textContent = '年份：' + year + '年';
+        addOperationLog('管理员', `更新年份为${year}年`);
+        saveData();
+    }
+}
+
+function filterChronicles() { updateChroniclesList(); }
+
+function deleteChronicle(id) {
+    if (!confirm('确定删除？')) return;
+    gameData.chronicles = gameData.chronicles.filter(c => c.id !== id);
+    addOperationLog('管理员', '删除推演记录');
+    updateChroniclesList();
+}
+
+// 投资系统
+function renderAdminInvestment() {
+    const panel = document.getElementById('panel-investment');
+    panel.innerHTML = `
+        <div class="card">
+            <div class="card-header">💰 投资操作</div>
+            <div class="card-body">
+                <div class="grid-2">
+                    <div class="form-group"><label>选择势力</label><select id="investFaction" onchange="updateInvestSamurai()"><option value="">--选择--</option>${Object.values(gameData.factions).map(f => `<option value="${f.id}">${f.name}</option>`).join('')}</select></div>
+                    <div class="form-group"><label>选择武士</label><select id="investSamurai"><option value="">--先选势力--</option></select></div>
+                    <div class="form-group"><label>投资类型</label><select id="investType">
+                        <option value="agriculture">农业（5000石，文治）</option>
+                        <option value="navy">水军（8000石，武功）</option>
+                        <option value="armament">武备（4000石，武功）</option>
+                        <option value="commerce">商业（自定金额，文治）</option>
+                    </select></div>
+                    <div class="form-group" id="commerceOptions" style="display:none">
+                        <label>目标郡国</label><select id="investTarget"></select>
+                    </div>
+                    <div class="form-group" id="commerceAmount" style="display:none">
+                        <label>投入资金</label><input type="number" id="investAmount" value="5000">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="executeInvestment()">执行投资</button>
+                <div id="investResult" style="margin-top:15px;padding:10px;background:#f8f9fa;border-radius:5px;display:none"></div>
+            </div>
+        </div>
+        <div class="card" style="margin-top:20px">
+            <div class="card-header">📊 投资等级说明</div>
+            <div class="card-body">
+                <div class="grid-3">
+                    <div>
+                        <h4 style="color:var(--primary-color)">农业</h4>
+                        <p style="font-size:12px">LV0荒废→LV7瑞穗<br>影响自然增长率和石高加成</p>
+                    </div>
+                    <div>
+                        <h4 style="color:var(--primary-color)">水军</h4>
+                        <p style="font-size:12px">LV0渔船→LV7遮天蔽日<br>影响海战能力</p>
+                    </div>
+                    <div>
+                        <h4 style="color:var(--primary-color)">武备</h4>
+                        <p style="font-size:12px">LV0朽坏→LV7武库<br>影响装备维护费</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById('investType').addEventListener('change', function() {
+        const isCommerce = this.value === 'commerce';
+        document.getElementById('commerceOptions').style.display = isCommerce ? 'block' : 'none';
+        document.getElementById('commerceAmount').style.display = isCommerce ? 'block' : 'none';
+        if (isCommerce) updateInvestTargets();
+    });
+}
+
+function updateInvestSamurai() {
+    const fid = document.getElementById('investFaction').value;
+    const sel = document.getElementById('investSamurai');
+    sel.innerHTML = '<option value="">--选择--</option>';
+    if (fid && gameData.factions[fid]) {
+        gameData.factions[fid].samurai.forEach(s => {
+            sel.innerHTML += `<option value="${s.name}">${s.name}(武${s.martial}/文${s.civil})</option>`;
+        });
+    }
+}
+
+function updateInvestTargets() {
+    const fid = document.getElementById('investFaction').value;
+    const sel = document.getElementById('investTarget');
+    sel.innerHTML = '<option value="">--选择--</option>';
+    if (fid) {
+        gameData.territories.filter(t => t.owner === fid).forEach(t => {
+            sel.innerHTML += `<option value="${t.code}">${t.name}${t.developableProduct ? '(可开发:' + t.developableProduct + ')' : ''}</option>`;
+        });
+    }
+}
+
+function executeInvestment() {
+    const fid = document.getElementById('investFaction').value;
+    const samurai = document.getElementById('investSamurai').value;
+    const type = document.getElementById('investType').value;
+    
+    if (!fid || !samurai) { alert('请选择势力和武士'); return; }
+    
+    let result;
+    if (type === 'commerce') {
+        const target = document.getElementById('investTarget').value;
+        const amount = parseInt(document.getElementById('investAmount').value) || 0;
+        if (!target) { alert('请选择目标郡国'); return; }
+        if (amount < 1000) { alert('投入资金至少1000石'); return; }
+        result = doCommerceInvestment(fid, samurai, target, amount);
+    } else {
+        result = doInvestment(fid, type, samurai);
+    }
+    
+    const resultDiv = document.getElementById('investResult');
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = result.success ? 
+        `<span style="color:green">✓ ${result.msg}</span>` : 
+        `<span style="color:red">✗ ${result.msg}</span>`;
+    
+    if (result.success) {
+        addOperationLog('管理员', `【${gameData.factions[fid].name}】${samurai}执行${type}投资：${result.msg}`);
+        updateFactionsList();
+    }
+}
+
+// 数据导入
+function renderAdminImport() {
+    const panel = document.getElementById('panel-import');
+    panel.innerHTML = `
+        <div class="toolbar">
+            <button class="btn btn-primary" onclick="showImportModal('territories')">导入郡国</button>
+            <button class="btn btn-primary" onclick="showImportModal('armies')">导入军团</button>
+            <button class="btn btn-primary" onclick="showImportModal('factions')">导入势力</button>
+        </div>
+        <div class="card">
+            <div class="card-header">📋 导入说明</div>
+            <div class="card-body">
+                <p>1. 点击按钮选择导入类型</p>
+                <p>2. 在表格中填写数据，或从Excel复制粘贴</p>
+                <p>3. 点击确认导入</p>
+                <p style="color:var(--warning-color);margin-top:10px">提示：可直接从Excel复制多行数据粘贴</p>
+            </div>
+        </div>
+    `;
+}
+
+function showImportModal(type) {
+    let headers = [], title = '';
+    switch(type) {
+        case 'territories':
+            title = '导入郡国';
+            headers = ['代码', '令制国', '郡名', '城池', '等级', '基础石高', '特产1', '特产2', '特产3', '可发展特产', '势力ID', '驻军', '简介'];
+            break;
+        case 'armies':
+            title = '导入军团';
+            headers = ['势力ID', '军团名称', '将领', '人数', '铁炮', '战马', '大筒', '位置'];
+            break;
+        case 'factions':
+            title = '导入势力';
+            headers = ['ID', '名称', '家主', '代码', '税率', '产业石高'];
+            break;
+    }
+    
+    let tableHtml = `
+        <p style="margin-bottom:10px;font-size:12px;color:#666">在表格中填写或从Excel粘贴数据</p>
+        <div style="overflow-x:auto">
+            <table class="import-table" id="importTable" style="border-collapse:collapse;width:100%">
+                <thead><tr>${headers.map(h => `<th style="border:1px solid #ddd;padding:5px;background:#f5f5f5;font-size:12px">${h}</th>`).join('')}</tr></thead>
+                <tbody>${Array(8).fill(0).map(() => `<tr>${headers.map(() => `<td style="border:1px solid #ddd;padding:2px"><input type="text" style="width:100%;border:none;padding:3px;font-size:12px"></td>`).join('')}</tr>`).join('')}</tbody>
+            </table>
+        </div>
+        <button class="btn btn-secondary" onclick="addImportRow()" style="margin-top:10px">添加行</button>
+    `;
+    
+    openModal(title, tableHtml, [
+        { text: '取消', class: 'btn-secondary', action: 'closeModal()' },
+        { text: '确认导入', class: 'btn-success', action: `confirmImport('${type}')` }
+    ]);
+    
+    setTimeout(() => {
+        document.getElementById('importTable').addEventListener('paste', handlePaste);
+    }, 100);
+}
+
+function addImportRow() {
+    const tbody = document.querySelector('#importTable tbody');
+    const cols = document.querySelectorAll('#importTable thead th').length;
+    const row = document.createElement('tr');
+    row.innerHTML = Array(cols).fill(0).map(() => `<td style="border:1px solid #ddd;padding:2px"><input type="text" style="width:100%;border:none;padding:3px;font-size:12px"></td>`).join('');
+    tbody.appendChild(row);
+}
+
+function handlePaste(e) {
+    e.preventDefault();
+    const data = (e.clipboardData || window.clipboardData).getData('text');
+    const rows = data.split('\\n').filter(r => r.trim());
+    const tbody = document.querySelector('#importTable tbody');
+    const cols = document.querySelectorAll('#importTable thead th').length;
+    
+    const active = document.activeElement;
+    let startRow = 0, startCol = 0;
+    if (active && active.tagName === 'INPUT') {
+        const cell = active.closest('td');
+        const row = cell.closest('tr');
+        startRow = Array.from(tbody.querySelectorAll('tr')).indexOf(row);
+        startCol = Array.from(row.querySelectorAll('td')).indexOf(cell);
+    }
+    
+    rows.forEach((rowData, ri) => {
+        const colData = rowData.split('\\t');
+        const targetRow = startRow + ri;
+        while (tbody.querySelectorAll('tr').length <= targetRow) addImportRow();
+        const tr = tbody.querySelectorAll('tr')[targetRow];
+        const inputs = tr.querySelectorAll('input');
+        colData.forEach((val, ci) => {
+            const targetCol = startCol + ci;
+            if (targetCol < inputs.length) inputs[targetCol].value = val.trim();
+        });
+    });
+}
+
+function confirmImport(type) {
+    const rows = document.querySelectorAll('#importTable tbody tr');
+    let imported = 0;
+    
+    rows.forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        const vals = Array.from(inputs).map(i => i.value.trim());
+        if (vals.every(v => !v)) return;
+        
+        switch(type) {
+            case 'territories':
+                if (vals[0] && vals[2]) {
+                    const existing = gameData.territories.findIndex(t => t.code === vals[0]);
+                    const newT = {
+                        code: vals[0], province: vals[1], name: vals[2], castle: vals[3],
+                        castleLevel: parseInt(vals[4]) || 0, baseKoku: parseInt(vals[5]) || 0,
+                        product1: vals[6], product2: vals[7], product3: vals[8],
+                        developableProduct: vals[9], owner: vals[10], garrison: vals[11], description: vals[12]
+                    };
+                    if (existing > -1) gameData.territories[existing] = newT;
+                    else gameData.territories.push(newT);
+                    imported++;
+                }
+                break;
+            case 'armies':
+                if (vals[0] && vals[1]) {
+                    gameData.armies.push({
+                        id: gameData.nextArmyId++, faction: vals[0], name: vals[1], general: vals[2],
+                        soldiers: parseInt(vals[3]) || 0, guns: parseInt(vals[4]) || 0,
+                        horses: parseInt(vals[5]) || 0, cannons: parseInt(vals[6]) || 0, location: vals[7]
+                    });
+                    imported++;
+                }
+                break;
+            case 'factions':
+                if (vals[0] && vals[1] && vals[3]) {
+                    gameData.factions[vals[0]] = {
+                        id: vals[0], name: vals[1], lord: vals[2], code: vals[3],
+                        taxRate: parseInt(vals[4]) || 60, industryKoku: parseInt(vals[5]) || 10000,
+                        agriculture: { points: 15 }, commerce: { points: 0 }, navy: { points: 10 }, armament: { points: 15 },
+                        arsenal: { guns: 0, horses: 0, cannons: 0 }, soldiers: { idle: 0 },
+                        money: 0, buffs: [], samurai: [], diplomacy: []
+                    };
+                    imported++;
+                }
+                break;
+        }
+    });
+    
+    if (imported > 0) {
+        addOperationLog('管理员', `导入${imported}条${type === 'territories' ? '郡国' : type === 'armies' ? '军团' : '势力'}数据`);
+        alert(`成功导入${imported}条数据`);
+        closeModal();
+        renderAdminView();
+    } else {
+        alert('没有有效数据');
+    }
+}
+
+// 操作记录
+function renderAdminLogs() {
+    const panel = document.getElementById('panel-logs');
+    panel.innerHTML = `
+        <div class="toolbar">
+            <input type="text" id="logFilter" placeholder="筛选操作人" style="width:150px">
+            <button class="btn btn-primary" onclick="filterLogs()">筛选</button>
+            <button class="btn btn-secondary" onclick="clearLogFilter()">清除</button>
+        </div>
+        <div class="table-wrapper"><div class="table-scroll" style="max-height:550px">
+            <table>
+                <thead><tr>
+                    <th style="width:20%">时间</th>
+                    <th style="width:15%">操作人</th>
+                    <th style="width:45%">内容</th>
+                    <th style="width:20%">操作</th>
+                </tr></thead>
+                <tbody id="logsList"></tbody>
+            </table>
+        </div></div>
+    `;
+    updateLogsList();
+}
+
+function updateLogsList() {
+    const filter = document.getElementById('logFilter')?.value || '';
+    let logs = gameData.operationLogs;
+    if (filter) logs = logs.filter(l => l.operator.includes(filter));
+    document.getElementById('logsList').innerHTML = logs.map((log, i) => `<tr>
+        <td style="font-size:12px">${log.time}</td>
+        <td>${log.operator}</td>
+        <td title="${log.content}">${log.content.length > 30 ? log.content.substring(0, 30) + '...' : log.content}</td>
+        <td>${i < 20 ? `<button class="btn btn-warning" onclick="rollbackTo(${i})">回溯</button>` : ''}</td>
+    </tr>`).join('');
+}
+
+function filterLogs() { updateLogsList(); }
+function clearLogFilter() { document.getElementById('logFilter').value = ''; updateLogsList(); }
+
+function rollbackTo(idx) {
+    if (!confirm('确定回溯到此时间点？当前数据将被覆盖！')) return;
+    const log = gameData.operationLogs[idx];
+    if (log && log.snapshot) {
+        try {
+            gameData = JSON.parse(log.snapshot);
+            saveData();
+            alert('数据已回溯');
+            renderAdminView();
+        } catch (e) {
+            alert('回溯失败');
+        }
+    }
+}
+
+// 数据备份
+function renderAdminBackup() {
+    const panel = document.getElementById('panel-backup');
+    panel.innerHTML = `
+        <div class="card">
+            <div class="card-header">💾 数据备份与恢复</div>
+            <div class="card-body">
+                <div class="grid-2">
+                    <div>
+                        <h4 style="margin-bottom:10px;color:var(--primary-color)">导出数据</h4>
+                        <p style="margin-bottom:10px;font-size:13px;color:#666">将所有数据导出为JSON文件</p>
+                        <button class="btn btn-success" onclick="exportData()">导出数据</button>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom:10px;color:var(--primary-color)">导入数据</h4>
+                        <p style="margin-bottom:10px;font-size:13px;color:#666">从JSON文件恢复数据</p>
+                        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importDataFile(event)">
+                        <button class="btn btn-warning" onclick="document.getElementById('importFile').click()">导入数据</button>
+                    </div>
+                </div>
+                <hr style="margin:20px 0">
+                <h4 style="margin-bottom:10px;color:var(--danger-color)">危险操作</h4>
+                <button class="btn btn-danger" onclick="resetAllData()">重置所有数据</button>
+            </div>
+        </div>
+        <div class="card" style="margin-top:20px">
+            <div class="card-header">📊 数据统计</div>
+            <div class="card-body">
+                <div class="grid-4">
+                    <div class="info-item"><span class="label">势力</span><span class="value">${Object.keys(gameData.factions).length}</span></div>
+                    <div class="info-item"><span class="label">领地</span><span class="value">${gameData.territories.length}</span></div>
+                    <div class="info-item"><span class="label">军团</span><span class="value">${gameData.armies.length}</span></div>
+                    <div class="info-item"><span class="label">特产</span><span class="value">${Object.keys(gameData.products).length}</span></div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function exportData() {
+    const blob = new Blob([JSON.stringify(gameData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `下克上存档_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    addOperationLog('管理员', '导出数据');
+}
+
+function importDataFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (!confirm('导入将覆盖当前数据，确定？')) return;
+            gameData = data;
+            saveData();
+            addOperationLog('管理员', '导入数据');
+            alert('导入成功');
+            renderAdminView();
+        } catch (err) {
+            alert('文件格式错误');
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+}
+
+function resetAllData() {
+    if (!confirm('确定重置所有数据？')) return;
+    if (!confirm('再次确认！')) return;
+    gameData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    saveData();
+    alert('数据已重置');
+    renderAdminView();
+}
+
+// ==================== 通用功能 ====================
+function openModal(title, body, buttons) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalBody').innerHTML = body;
+    document.getElementById('modalFooter').innerHTML = buttons.map(b => `<button class="btn ${b.class}" onclick="${b.action}">${b.text}</button>`).join('');
+    document.getElementById('modal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+}
+
+function syncSlider(sliderId, value, min, max) {
+    let v = parseInt(value) || 0;
+    if (v < min) v = min;
+    if (v > max) v = max;
+    document.getElementById(sliderId).value = v;
+    event.target.value = v;
+}
+
+document.getElementById('modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.getElementById('loginCode').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') handleLogin();
+});
+
+init();
+</script>
+</body>
+</html>

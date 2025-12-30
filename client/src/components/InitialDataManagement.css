@@ -1,0 +1,43 @@
+/**
+ * 初始数据管理组件样式
+ * Requirements: 2.5.2, 2.5.3, 2.5.4, 2.5.5
+ */
+
+.initial-data-management {
+  width: 100%;
+}
+
+.initial-data-info {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.initial-data-info p {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.initial-data-info p:last-child {
+  margin-bottom: 0;
+}
+
+.changes-warning {
+  color: #856404 !important;
+  background: #fff3cd;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-top: 8px !important;
+}
+
+.modified-value {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.modified-value::after {
+  content: ' *';
+  color: #28a745;
+}
