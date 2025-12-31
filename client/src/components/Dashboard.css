@@ -224,6 +224,12 @@
   font-size: 14px;
 }
 
+.detail-sub-label {
+  font-size: 12px;
+  color: #999;
+  margin-left: 4px;
+}
+
 .detail-value {
   font-weight: 500;
   color: #1a1a2e;

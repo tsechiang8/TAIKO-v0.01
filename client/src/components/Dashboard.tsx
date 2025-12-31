@@ -274,7 +274,8 @@ export function Dashboard({ user, onLogout, onOpenAdminPanel }: DashboardProps) 
             <DetailRow label="产业石高" value={formatKokudaka(data.industryKokudaka)} unit="万石" />
             <DetailRow 
               label="加成系数" 
-              value={`${data.bonusCoefficient >= 0 ? '+' : ''}${(data.bonusCoefficient * 100).toFixed(0)}%`} 
+              value={`${(data.bonusCoefficient + (data.specialProductKokudakaBonus || 0)) >= 0 ? '+' : ''}${((data.bonusCoefficient + (data.specialProductKokudakaBonus || 0)) * 100).toFixed(0)}%`} 
+              subLabel={`维持比${data.bonusCoefficient >= 0 ? '+' : ''}${(data.bonusCoefficient * 100).toFixed(0)}% + 特产${(data.specialProductKokudakaBonus || 0) >= 0 ? '+' : ''}${((data.specialProductKokudakaBonus || 0) * 100).toFixed(0)}%`}
             />
             <DetailRow 
               label="自然增长率" 
@@ -643,12 +644,16 @@ interface DetailRowProps {
   label: string;
   value: string;
   unit?: string;
+  subLabel?: string;
 }
 
-function DetailRow({ label, value, unit }: DetailRowProps) {
+function DetailRow({ label, value, unit, subLabel }: DetailRowProps) {
   return (
     <div className="detail-row">
-      <span className="detail-label">{label}</span>
+      <span className="detail-label">
+        {label}
+        {subLabel && <span className="detail-sub-label">（{subLabel}）</span>}
+      </span>
       <span className="detail-value">
         {value}
         {unit && <span className="detail-unit">{unit}</span>}

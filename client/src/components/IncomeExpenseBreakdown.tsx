@@ -34,6 +34,9 @@ export function IncomeExpenseBreakdown({ data }: IncomeExpenseBreakdownProps) {
   };
 
   // 计算收入项目（表面石高的组成部分）
+  // 特产石高加成系数（安全处理）
+  const specialProductKokudakaBonus = data.specialProductKokudakaBonus || 0;
+  
   const incomeItems: BreakdownItem[] = [
     {
       name: '领地石高',
@@ -41,9 +44,14 @@ export function IncomeExpenseBreakdown({ data }: IncomeExpenseBreakdownProps) {
       note: '所有领地的基础石高总和',
     },
     {
-      name: '加成系数效果',
+      name: '维持比加成效果',
       value: Math.floor(data.territoryKokudaka * data.bonusCoefficient),
       note: `领地石高 × ${(data.bonusCoefficient * 100).toFixed(0)}%`,
+    },
+    {
+      name: '特产石高加成效果',
+      value: Math.floor(data.territoryKokudaka * specialProductKokudakaBonus),
+      note: `领地石高 × ${(specialProductKokudakaBonus * 100).toFixed(0)}%`,
     },
     {
       name: '特产石高',
