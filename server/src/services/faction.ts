@@ -68,6 +68,8 @@ export interface FactionDashboardData {
   // 详细计算数据
   territoryKokudaka: number;
   specialProductKokudaka: number;
+  specialProductKokudakaBonus: number;  // 特产石高加成系数
+  specialProductAnnualHorses: number;   // 特产年产战马
   integrationBonus: number;
   industryKokudaka: number;
   bonusCoefficient: number;
@@ -177,6 +179,8 @@ export function getFactionDashboard(factionId: string): FactionDashboardData | n
     // 详细计算数据
     territoryKokudaka: calculation.territoryKokudaka,
     specialProductKokudaka: calculation.specialProductKokudaka,
+    specialProductKokudakaBonus: calculation.specialProductKokudakaBonus,
+    specialProductAnnualHorses: calculation.specialProductAnnualHorses,
     integrationBonus: calculation.integrationBonus,
     industryKokudaka: faction.industryKokudaka,
     bonusCoefficient: calculation.bonusCoefficient,

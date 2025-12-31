@@ -68,6 +68,9 @@ export interface FactionSettlement {
   maintenanceCost: number;
   previousTreasury: number;
   newTreasury: number;
+  horsesGained: number;           // 新增：获得的战马数量
+  previousHorses: number;         // 新增：结算前战马数量
+  newHorses: number;              // 新增：结算后战马数量
   kokudakaGrowth: { territoryId: string; territoryName: string; growth: number }[];
   totalKokudakaGrowth: number;
   samuraisReset: number;
@@ -151,6 +154,11 @@ export function advanceYear(): { success: boolean; settlement?: YearEndSettlemen
       }
     }
 
+    // 4. 添加特产年产战马到势力库存
+    const previousHorses = faction.horses;
+    const horsesGained = calcResult.specialProductAnnualHorses;
+    faction.horses = previousHorses + horsesGained;
+
     factionSettlements.push({
       factionId: faction.id,
       factionName: faction.name,
@@ -158,6 +166,9 @@ export function advanceYear(): { success: boolean; settlement?: YearEndSettlemen
       maintenanceCost,
       previousTreasury,
       newTreasury: faction.treasury,
+      horsesGained,
+      previousHorses,
+      newHorses: faction.horses,
       kokudakaGrowth,
       totalKokudakaGrowth,
       samuraisReset,

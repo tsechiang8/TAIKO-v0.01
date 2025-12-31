@@ -98,7 +98,69 @@ export function calculateSpecialProductSoldierBonus(
     for (const productName of products) {
       const product = productMap.get(productName);
       if (product) {
-        total += product.soldierCapacityBonus;
+        total += product.soldierCapacityBonus || 0;
+      }
+    }
+  }
+
+  return total;
+}
+
+/**
+ * 计算特产石高加成系数总和
+ * @param territories 势力拥有的所有领地
+ * @param specialProducts 特产配置表
+ * @returns 石高加成系数总和（如0.02表示2%）
+ */
+export function calculateSpecialProductKokudakaBonus(
+  territories: Territory[],
+  specialProducts: SpecialProduct[]
+): number {
+  const productMap = new Map(specialProducts.map(p => [p.name, p]));
+  let total = 0;
+
+  for (const territory of territories) {
+    const products = [
+      territory.specialProduct1,
+      territory.specialProduct2,
+      territory.specialProduct3,
+    ].filter((p): p is string => !!p);
+
+    for (const productName of products) {
+      const product = productMap.get(productName);
+      if (product) {
+        total += product.kokudakaBonus || 0;
+      }
+    }
+  }
+
+  return total;
+}
+
+/**
+ * 计算特产年产战马总和
+ * @param territories 势力拥有的所有领地
+ * @param specialProducts 特产配置表
+ * @returns 年产战马总数
+ */
+export function calculateSpecialProductAnnualHorses(
+  territories: Territory[],
+  specialProducts: SpecialProduct[]
+): number {
+  const productMap = new Map(specialProducts.map(p => [p.name, p]));
+  let total = 0;
+
+  for (const territory of territories) {
+    const products = [
+      territory.specialProduct1,
+      territory.specialProduct2,
+      territory.specialProduct3,
+    ].filter((p): p is string => !!p);
+
+    for (const productName of products) {
+      const product = productMap.get(productName);
+      if (product) {
+        total += product.annualHorses || 0;
       }
     }
   }
@@ -217,13 +279,14 @@ export function getGrowthRate(maintenanceRatio: number): number {
 
 /**
  * 计算表面石高
- * 公式：领地石高 × (1 + 加成系数) + 特产石高 + 领内财产 + 产业石高
+ * 公式：领地石高 × (1 + 士兵维持比加成系数 + 特产石高加成系数) + 特产年产石高 + 领内财产 + 产业石高
  * @param params 计算参数
  * @returns 表面石高
  */
 export function calculateSurfaceKokudaka(params: {
   territoryKokudaka: number;
   bonusCoefficient: number;
+  specialProductKokudakaBonus?: number;  // 特产石高加成系数
   specialProductKokudaka: number;
   integrationBonus: number;
   industryKokudaka: number;
@@ -231,13 +294,14 @@ export function calculateSurfaceKokudaka(params: {
   const {
     territoryKokudaka,
     bonusCoefficient,
+    specialProductKokudakaBonus = 0,
     specialProductKokudaka,
     integrationBonus,
     industryKokudaka,
   } = params;
 
   return (
-    territoryKokudaka * (1 + bonusCoefficient) +
+    territoryKokudaka * (1 + bonusCoefficient + specialProductKokudakaBonus) +
     specialProductKokudaka +
     integrationBonus +
     industryKokudaka
@@ -409,6 +473,8 @@ export function calculateLegionSoldiers(legions: Legion[]): number {
 export interface FactionCalculationResult {
   territoryKokudaka: number;
   specialProductKokudaka: number;
+  specialProductKokudakaBonus: number;  // 特产石高加成系数
+  specialProductAnnualHorses: number;   // 特产年产战马
   integrationBonus: number;
   bonusCoefficient: number;
   growthRate: number;
@@ -443,6 +509,8 @@ export function calculateFactionData(
   // 基础石高计算
   const territoryKokudaka = calculateTerritoryKokudaka(territories);
   const specialProductKokudaka = calculateSpecialProductKokudaka(territories, specialProducts);
+  const specialProductKokudakaBonus = calculateSpecialProductKokudakaBonus(territories, specialProducts);
+  const specialProductAnnualHorses = calculateSpecialProductAnnualHorses(territories, specialProducts);
   const integrationBonus = calculateIntegrationBonus(territories, allTerritories);
 
   // 特产士兵加成
@@ -462,10 +530,11 @@ export function calculateFactionData(
   const bonusCoefficient = getBonusCoefficient(soldierMaintenanceRatio);
   const growthRate = getGrowthRate(soldierMaintenanceRatio);
 
-  // 表面石高和收入
+  // 表面石高和收入（包含特产石高加成系数）
   const surfaceKokudaka = calculateSurfaceKokudaka({
     territoryKokudaka,
     bonusCoefficient,
+    specialProductKokudakaBonus,
     specialProductKokudaka,
     integrationBonus,
     industryKokudaka: faction.industryKokudaka,
@@ -494,6 +563,8 @@ export function calculateFactionData(
   return {
     territoryKokudaka,
     specialProductKokudaka,
+    specialProductKokudakaBonus,
+    specialProductAnnualHorses,
     integrationBonus,
     bonusCoefficient,
     growthRate,

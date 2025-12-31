@@ -117,6 +117,8 @@ export interface FactionDashboardData {
   buffs: Buff[];
   territoryKokudaka: number;
   specialProductKokudaka: number;
+  specialProductKokudakaBonus: number;  // 特产石高加成系数
+  specialProductAnnualHorses: number;   // 特产年产战马
   integrationBonus: number;
   industryKokudaka: number;
   bonusCoefficient: number;

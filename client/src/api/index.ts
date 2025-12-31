@@ -788,6 +788,9 @@ export interface FactionSettlement {
   maintenanceCost: number;
   previousTreasury: number;
   newTreasury: number;
+  horsesGained: number;           // 特产年产战马获得数量
+  previousHorses: number;         // 结算前战马数量
+  newHorses: number;              // 结算后战马数量
   kokudakaGrowth: { territoryId: string; territoryName: string; growth: number }[];
   totalKokudakaGrowth: number;
   samuraisReset: number;

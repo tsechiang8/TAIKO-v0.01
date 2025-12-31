@@ -338,7 +338,6 @@ export function InvestmentPanel({ factionId, onInvestmentComplete }: InvestmentP
                 {territories.map((territory) => (
                   <option key={territory.id} value={territory.id}>
                     {territory.provinceName} - {territory.districtName}
-                    {territory.developableProduct ? ` (可开发: ${territory.developableProduct})` : ' (无可开发特产)'}
                   </option>
                 ))}
               </select>
@@ -442,27 +441,15 @@ export function InvestmentPanel({ factionId, onInvestmentComplete }: InvestmentP
                   <span>投入金额</span>
                   <span>{commercePreview.cost.toLocaleString()} 石</span>
                 </div>
-                <div className="preview-row">
-                  <span>可开发特产</span>
-                  <span className={commercePreview.hasDevelopableProduct ? 'has-product' : 'no-product'}>
-                    {commercePreview.hasDevelopableProduct 
-                      ? commercePreview.developableProductName 
-                      : '无'}
-                  </span>
-                </div>
                 <div className="commerce-outcomes">
                   <div className="outcome-info">
                     <strong>大成功 (≤5):</strong> 退还50%投资
                   </div>
                   <div className="outcome-info">
-                    <strong>成功:</strong> {commercePreview.hasDevelopableProduct 
-                      ? `开发特产【${commercePreview.developableProductName}】` 
-                      : '此地并无新商机'}
+                    <strong>成功:</strong> 若有可开发特产则成功开发
                   </div>
                   <div className="outcome-info">
-                    <strong>失败:</strong> {commercePreview.hasDevelopableProduct 
-                      ? `有关于【${commercePreview.developableProductName}】的传闻，但资金不足` 
-                      : '没有打探到有价值的情报'}
+                    <strong>失败:</strong> 投资失败，金额不退还
                   </div>
                 </div>
               </div>
@@ -511,12 +498,6 @@ export function InvestmentPanel({ factionId, onInvestmentComplete }: InvestmentP
                   <div className="confirm-row">
                     <span className="confirm-label">成功率</span>
                     <span className="confirm-value highlight">{(commercePreview.successRate * 100).toFixed(0)}%</span>
-                  </div>
-                  <div className="confirm-row">
-                    <span className="confirm-label">可开发特产</span>
-                    <span className={`confirm-value ${commercePreview.hasDevelopableProduct ? 'has-product' : 'no-product'}`}>
-                      {commercePreview.hasDevelopableProduct ? commercePreview.developableProductName : '无'}
-                    </span>
                   </div>
                 </>
               ) : preview && (

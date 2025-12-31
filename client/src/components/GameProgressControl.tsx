@@ -617,6 +617,9 @@ export function GameProgressControl() {
                     <span>维护费：{fs.maintenanceCost.toLocaleString()} 石</span>
                     <span>库存变化：{fs.previousTreasury.toLocaleString()} → {fs.newTreasury.toLocaleString()}</span>
                     <span>石高增长：{fs.totalKokudakaGrowth >= 0 ? '+' : ''}{fs.totalKokudakaGrowth.toLocaleString()}</span>
+                    {fs.horsesGained > 0 && (
+                      <span>战马产出：+{fs.horsesGained} 匹 ({fs.previousHorses} → {fs.newHorses})</span>
+                    )}
                     <span>武士重置：{fs.samuraisReset} 人</span>
                   </div>
                 </div>
