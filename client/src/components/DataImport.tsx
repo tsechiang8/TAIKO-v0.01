@@ -108,6 +108,8 @@ export function DataImport({ onImportComplete }: DataImportProps) {
         return '势力数据';
       case 'specialProduct':
         return '特产数据';
+      case 'samurai':
+        return '武士数据';
       default:
         return type;
     }
@@ -179,6 +181,11 @@ export function DataImport({ onImportComplete }: DataImportProps) {
       soldierCapacityBonus: '兵力加成',
       kokudakaBonus: '石高加成',
       otherEffects: '其他效果',
+      // 武士字段
+      age: '年龄',
+      civilValue: '文治',
+      martialValue: '武功',
+      type: '类型',
     };
     return labels[col] || col;
   };
@@ -189,7 +196,7 @@ export function DataImport({ onImportComplete }: DataImportProps) {
 
       {/* 类型选择 */}
       <div className="import-type-selector">
-        {(['territory', 'legion', 'faction', 'specialProduct'] as ImportType[]).map((type) => (
+        {(['territory', 'legion', 'faction', 'specialProduct', 'samurai'] as ImportType[]).map((type) => (
           <button
             key={type}
             className={`type-btn ${selectedType === type ? 'active' : ''}`}

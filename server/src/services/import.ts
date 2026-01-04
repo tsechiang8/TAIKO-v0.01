@@ -27,7 +27,7 @@ import {
 } from '../storage';
 
 // 导入类型
-export type ImportType = 'territory' | 'legion' | 'faction' | 'specialProduct';
+export type ImportType = 'territory' | 'legion' | 'faction' | 'specialProduct' | 'samurai';
 
 // 导入结果
 export interface ImportResult {
@@ -710,6 +710,8 @@ export function importData(
       return importFactionData(text, overwrite);
     case 'specialProduct':
       return importSpecialProductData(text, overwrite);
+    case 'samurai':
+      return importSamuraiData(text, overwrite);
     default:
       return {
         success: false,
@@ -733,6 +735,8 @@ export function getImportTemplate(type: ImportType): string {
       return '势力名称\t家主姓名\t登录代码\t税率\t金库\t闲置士兵\t铁炮\t战马\t大筒\t农业点数\t商业点数\t水军点数\t武备点数\t产业石高';
     case 'specialProduct':
       return '特产名称\t年产石高\t年产战马\t兵力加成\t石高加成\t其他效果';
+    case 'samurai':
+      return '势力\t姓名\t年龄\t文治\t武功\t类型';
     default:
       return '';
   }
@@ -881,6 +885,180 @@ export function importSpecialProductData(text: string, overwrite: boolean = true
   }
 
   saveSpecialProducts(newProducts);
+
+  return {
+    success: parseResult.errors.length === 0,
+    imported,
+    errors: parseResult.errors,
+    warnings,
+  };
+}
+
+// ============ 武士数据解析 ============
+
+/**
+ * 武士导入格式（Excel粘贴）：
+ * 势力 | 姓名 | 年龄 | 文治 | 武功 | 类型
+ */
+export interface SamuraiImportRow {
+  factionName: string;
+  name: string;
+  age?: number;
+  civilValue: number;
+  martialValue: number;
+  type: 'warrior' | 'strategist';
+}
+
+/**
+ * 解析武士数据
+ */
+export function parseSamuraiData(text: string): ParseResult<SamuraiImportRow> {
+  const lines = parseLines(text);
+  const data: SamuraiImportRow[] = [];
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  if (lines.length === 0) {
+    return { success: false, data: [], errors: ['没有数据可导入'], warnings: [] };
+  }
+
+  // 跳过表头
+  let startIndex = 0;
+  const firstLine = lines[0].toLowerCase();
+  if (firstLine.includes('势力') || firstLine.includes('姓名') || firstLine.includes('武功') || firstLine.includes('faction')) {
+    startIndex = 1;
+  }
+
+  for (let i = startIndex; i < lines.length; i++) {
+    const lineNum = i + 1;
+    const cells = parseTabSeparatedLine(lines[i]);
+
+    if (cells.length < 5) {
+      errors.push(`第${lineNum}行: 列数不足，至少需要5列（势力、姓名、文治、武功、类型）`);
+      continue;
+    }
+
+    const [factionName, name, ageStr, civilValueStr, martialValueStr, typeStr] = cells;
+
+    // 验证必填字段
+    if (!factionName) {
+      errors.push(`第${lineNum}行: 势力名称不能为空`);
+      continue;
+    }
+
+    if (!name) {
+      errors.push(`第${lineNum}行: 姓名不能为空`);
+      continue;
+    }
+
+    // 解析年龄（可选）
+    const age = ageStr ? parseInt(ageStr, 10) : undefined;
+    if (ageStr && isNaN(age as any)) {
+      warnings.push(`第${lineNum}行: 年龄格式错误，已忽略`);
+    }
+
+    // 解析文治
+    const civilValue = parseInt(civilValueStr, 10);
+    if (isNaN(civilValue)) {
+      errors.push(`第${lineNum}行: 文治必须是数字`);
+      continue;
+    }
+
+    // 解析武功
+    const martialValue = parseInt(martialValueStr, 10);
+    if (isNaN(martialValue)) {
+      errors.push(`第${lineNum}行: 武功必须是数字`);
+      continue;
+    }
+
+    // 解析类型
+    const typeStr_lower = (typeStr || '').toLowerCase().trim();
+    let type: 'warrior' | 'strategist' = 'warrior';
+    if (typeStr_lower.includes('strategist') || typeStr_lower.includes('谋士') || typeStr_lower.includes('策士')) {
+      type = 'strategist';
+    } else if (typeStr_lower.includes('warrior') || typeStr_lower.includes('武士') || typeStr_lower.includes('战士')) {
+      type = 'warrior';
+    } else if (typeStr) {
+      warnings.push(`第${lineNum}行: 类型"${typeStr}"不识别，默认为武士`);
+    }
+
+    data.push({
+      factionName,
+      name,
+      age,
+      civilValue,
+      martialValue,
+      type,
+    });
+  }
+
+  return {
+    success: errors.length === 0,
+    data,
+    errors,
+    warnings,
+  };
+}
+
+/**
+ * 导入武士数据
+ */
+export function importSamuraiData(text: string, overwrite: boolean = true): ImportResult {
+  const parseResult = parseSamuraiData(text);
+
+  if (!parseResult.success && parseResult.data.length === 0) {
+    return {
+      success: false,
+      imported: 0,
+      errors: parseResult.errors,
+      warnings: parseResult.warnings,
+    };
+  }
+
+  const factions = getFactions();
+  const factionMap = new Map(factions.map(f => [f.name, f]));
+
+  const existingSamurais = getSamurais();
+  const newSamurais: Samurai[] = overwrite ? [] : [...existingSamurais];
+  const warnings: string[] = [...parseResult.warnings];
+  let imported = 0;
+
+  for (const row of parseResult.data) {
+    // 验证势力是否存在
+    const faction = factionMap.get(row.factionName);
+    if (!faction) {
+      warnings.push(`武士"${row.name}": 势力"${row.factionName}"不存在，已跳过`);
+      continue;
+    }
+
+    const samurai: Samurai = {
+      id: uuidv4(),
+      name: row.name,
+      age: row.age,
+      type: row.type,
+      martialValue: row.martialValue,
+      civilValue: row.civilValue,
+      factionId: faction.id,
+      isIdle: true,
+      actionPoints: 0,
+      currentLegionId: undefined,
+    };
+
+    if (overwrite) {
+      newSamurais.push(samurai);
+    } else {
+      // 如果不覆盖，检查是否已存在同名武士
+      const idx = newSamurais.findIndex(s => s.name === samurai.name && s.factionId === samurai.factionId);
+      if (idx >= 0) {
+        newSamurais[idx] = samurai;
+      } else {
+        newSamurais.push(samurai);
+      }
+    }
+    imported++;
+  }
+
+  saveSamurais(newSamurais);
 
   return {
     success: parseResult.errors.length === 0,

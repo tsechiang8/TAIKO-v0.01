@@ -13,6 +13,7 @@ import {
   parseLegionData,
   parseFactionData,
   parseSpecialProductData,
+  parseSamuraiData,
 } from '../services/import';
 
 const router = Router();
@@ -20,7 +21,7 @@ const router = Router();
 // 所有导入路由都需要认证和管理员权限
 router.use(requireAuth, requireAdmin);
 
-const VALID_IMPORT_TYPES = ['territory', 'legion', 'faction', 'specialProduct'];
+const VALID_IMPORT_TYPES = ['territory', 'legion', 'faction', 'specialProduct', 'samurai'];
 
 /**
  * GET /api/import/template/:type
@@ -88,6 +89,9 @@ router.post('/preview/:type', (req: Request, res: Response) => {
       break;
     case 'specialProduct':
       parseResult = parseSpecialProductData(text);
+      break;
+    case 'samurai':
+      parseResult = parseSamuraiData(text);
       break;
     default:
       res.status(400).json({
@@ -175,6 +179,8 @@ function getTypeDescription(type: ImportType): string {
       return '势力数据导入：势力名称、家主姓名、登录代码、税率、金库、闲置士兵、铁炮、战马、大筒、农业/商业/水军/武备点数、产业石高';
     case 'specialProduct':
       return '特产数据导入：特产名称、年产石高、年产战马、兵力加成、石高加成（百分比）、其他效果';
+    case 'samurai':
+      return '武士数据导入：势力、姓名、年龄、文治、武功、类型（warrior/strategist）';
     default:
       return '';
   }

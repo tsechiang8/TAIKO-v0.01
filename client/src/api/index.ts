@@ -948,7 +948,7 @@ export async function rollbackToOperation(operationId: string): Promise<ApiRespo
 // ============ 数据导入 API (Requirements: 10.1-10.4) ============
 
 // 导入类型
-export type ImportType = 'territory' | 'legion' | 'faction' | 'specialProduct';
+export type ImportType = 'territory' | 'legion' | 'faction' | 'specialProduct' | 'samurai';
 
 // 导入模板信息
 export interface ImportTemplateInfo {
