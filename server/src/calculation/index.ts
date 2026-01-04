@@ -278,11 +278,14 @@ export function getGrowthRate(maintenanceRatio: number): number {
 }
 
 /**
- * 计算表面石高
- * 公式：领地石高 × (1 + 士兵维持比加成系数 + 特产石高加成系数) + 特产年产石高 + 领内财产 + 产业石高
- * @param params 计算参数
- * @returns 表面石高
+ * 计算商业点数收入
+ * 每个商业点数每年产生200石收入
+ * @param commercePoints 商业点数
+ * @returns 商业点数收入
  */
+export function calculateCommerceIncome(commercePoints: number): number {
+  return commercePoints * 200;
+}
 export function calculateSurfaceKokudaka(params: {
   territoryKokudaka: number;
   bonusCoefficient: number;
@@ -290,6 +293,7 @@ export function calculateSurfaceKokudaka(params: {
   specialProductKokudaka: number;
   integrationBonus: number;
   industryKokudaka: number;
+  commerceIncome?: number;  // 商业点数收入
 }): number {
   const {
     territoryKokudaka,
@@ -298,13 +302,15 @@ export function calculateSurfaceKokudaka(params: {
     specialProductKokudaka,
     integrationBonus,
     industryKokudaka,
+    commerceIncome = 0,
   } = params;
 
   return (
     territoryKokudaka * (1 + bonusCoefficient + specialProductKokudakaBonus) +
     specialProductKokudaka +
     integrationBonus +
-    industryKokudaka
+    industryKokudaka +
+    commerceIncome
   );
 }
 
@@ -480,6 +486,7 @@ export interface FactionCalculationResult {
   growthRate: number;
   surfaceKokudaka: number;
   income: number;
+  commerceIncome: number;  // 商业点数收入
   maxRecruitableSoldiers: number;
   totalSoldiers: number;
   legionSoldiers: number;
@@ -530,7 +537,10 @@ export function calculateFactionData(
   const bonusCoefficient = getBonusCoefficient(soldierMaintenanceRatio);
   const growthRate = getGrowthRate(soldierMaintenanceRatio);
 
-  // 表面石高和收入（包含特产石高加成系数）
+  // 商业点数收入
+  const commerceIncome = calculateCommerceIncome(faction.commercePoints);
+
+  // 表面石高和收入（包含特产石高加成系数和商业点数收入）
   const surfaceKokudaka = calculateSurfaceKokudaka({
     territoryKokudaka,
     bonusCoefficient,
@@ -538,6 +548,7 @@ export function calculateFactionData(
     specialProductKokudaka,
     integrationBonus,
     industryKokudaka: faction.industryKokudaka,
+    commerceIncome,
   });
   const income = calculateIncome(surfaceKokudaka, faction.taxRate);
 
@@ -570,6 +581,7 @@ export function calculateFactionData(
     growthRate,
     surfaceKokudaka,
     income,
+    commerceIncome,
     maxRecruitableSoldiers,
     totalSoldiers,
     legionSoldiers,

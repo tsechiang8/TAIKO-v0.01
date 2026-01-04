@@ -179,16 +179,19 @@ export function calculateSuccessRate(samuraiAttribute: number): number {
  * 公式推导：
  * - 文治贡献：(文治 - 40) / 60 * 45% = 文治每增加60点，成功率增加45%
  * - 金额贡献：(金额 - 1000) / 49000 * 45% = 金额每增加49000石，成功率增加45%
+ * - 商业点数贡献：(商业点数 / 5) * 1% = 每5点商业点数增加1%成功率
  * - 基础成功率：5%
- * - 最终成功率 = 5% + 文治贡献 + 金额贡献，限制在5%-95%
+ * - 最终成功率 = 5% + 文治贡献 + 金额贡献 + 商业点数贡献，限制在5%-95%
  * @param civilValue 武士文治值
  * @param amount 投入金额（石）
+ * @param commercePoints 商业点数（可选）
  * @returns 成功率（0.05-0.95）
  */
-export function calculateCommerceSuccessRate(civilValue: number, amount: number): number {
+export function calculateCommerceSuccessRate(civilValue: number, amount: number, commercePoints: number = 0): number {
   const civilContribution = ((civilValue - 40) / 60) * 0.45;
   const amountContribution = ((amount - 1000) / 49000) * 0.45;
-  const rawRate = 0.05 + civilContribution + amountContribution;
+  const commercePointsBonus = (commercePoints / 5) * 0.01;
+  const rawRate = 0.05 + civilContribution + amountContribution + commercePointsBonus;
   return Math.max(0.05, Math.min(0.95, rawRate));
 }
 
@@ -671,7 +674,7 @@ export function getCommerceInvestmentPreview(
 
   if (faction.treasury < amount) {
     return {
-      successRate: calculateCommerceSuccessRate(samurai.civilValue, amount),
+      successRate: calculateCommerceSuccessRate(samurai.civilValue, amount, faction.commercePoints),
       cost: amount,
       samuraiCivilValue: samurai.civilValue,
       territoryName: territory.districtName,
@@ -682,7 +685,7 @@ export function getCommerceInvestmentPreview(
     };
   }
 
-  const successRate = calculateCommerceSuccessRate(samurai.civilValue, amount);
+  const successRate = calculateCommerceSuccessRate(samurai.civilValue, amount, faction.commercePoints);
 
   return {
     successRate,
@@ -758,7 +761,7 @@ export function executeCommerceInvestment(
 
   // 执行D100判定
   const roll = rollOverride !== undefined ? rollOverride : rollD100();
-  const successRate = preview.successRate;
+  const successRate = calculateCommerceSuccessRate(samurai.civilValue, amount, faction.commercePoints);
   
   // 判定是否大成功（roll <= 5）
   const isCriticalSuccess = roll <= 5;
@@ -796,10 +799,13 @@ export function executeCommerceInvestment(
   const hasDevelopableProduct = !!territory.developableProduct;
   const productName = territory.developableProduct;
 
+  // 计算商业点数获得
+  let commercePointsGained = 0;
   if (isSuccess || isCriticalSuccess) {
     // 成功分支
     if (hasDevelopableProduct && productName) {
-      // 有可开发特产 + 成功 → 开发特产
+      // 有可开发特产 + 成功 → 开发特产，获得3点
+      commercePointsGained = 3;
       developedProduct = productName;
       
       // 将可开发特产添加到特产列表
@@ -815,24 +821,30 @@ export function executeCommerceInvestment(
       territory.developableProduct = undefined;
       
       message = isCriticalSuccess
-        ? `大成功！开发了特产【${productName}】，下月起开始产出收益。退还${refundAmount}石投资。`
-        : `开发了特产【${productName}】，下月起开始产出收益。`;
+        ? `大成功！开发了特产【${productName}】，下月起开始产出收益。退还${refundAmount}石投资。获得3点商业点数。`
+        : `开发了特产【${productName}】，下月起开始产出收益。获得3点商业点数。`;
     } else {
-      // 无可开发特产 + 成功 → 无新商机
+      // 无可开发特产 + 成功 → 无新商机，获得8点
+      commercePointsGained = 8;
       message = isCriticalSuccess
-        ? `大成功！但此地并无新商机。退还${refundAmount}石投资。`
-        : '此地并无新商机。';
+        ? `大成功！但此地并无新商机。退还${refundAmount}石投资。获得8点商业点数。`
+        : '此地并无新商机。获得8点商业点数。';
     }
   } else {
-    // 失败分支
+    // 失败分支，获得2点
+    commercePointsGained = 2;
     if (hasDevelopableProduct && productName) {
       // 有可开发特产 + 失败 → 有传闻但资金不足
-      message = `似乎有关于【${productName}】的传闻，但投入资金不足，未能形成产业。`;
+      message = `似乎有关于【${productName}】的传闻，但投入资金不足，未能形成产业。获得2点商业点数。`;
     } else {
       // 无可开发特产 + 失败 → 没有打探到情报
-      message = '没有打探到有价值的情报。';
+      message = '没有打探到有价值的情报。获得2点商业点数。';
     }
   }
+
+  // 更新商业点数
+  const newCommercePoints = Math.min(100, faction.commercePoints + commercePointsGained);
+  faction.commercePoints = newCommercePoints;
 
   // 保存数据
   saveFactions(factions);

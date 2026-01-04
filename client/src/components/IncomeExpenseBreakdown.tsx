@@ -36,6 +36,7 @@ export function IncomeExpenseBreakdown({ data }: IncomeExpenseBreakdownProps) {
   // 计算收入项目（表面石高的组成部分）
   // 特产石高加成系数（安全处理）
   const specialProductKokudakaBonus = data.specialProductKokudakaBonus || 0;
+  const commerceIncome = data.commerceIncome || 0;
   
   const incomeItems: BreakdownItem[] = [
     {
@@ -67,6 +68,11 @@ export function IncomeExpenseBreakdown({ data }: IncomeExpenseBreakdownProps) {
       name: '产业石高',
       value: data.industryKokudaka,
       note: '家族产业带来的石高',
+    },
+    {
+      name: '商业点数收入',
+      value: commerceIncome,
+      note: `${data.commercePoints}点 × 200石/点`,
     },
   ];
 

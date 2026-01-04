@@ -74,6 +74,7 @@ export interface FactionDashboardData {
   industryKokudaka: number;
   bonusCoefficient: number;
   growthRate: number;
+  commerceIncome: number;  // 商业点数收入
 
   // 维护费明细
   maintenanceCost: {
@@ -185,6 +186,7 @@ export function getFactionDashboard(factionId: string): FactionDashboardData | n
     industryKokudaka: faction.industryKokudaka,
     bonusCoefficient: calculation.bonusCoefficient,
     growthRate: calculation.growthRate,
+    commerceIncome: calculation.commerceIncome,
 
     // 维护费明细
     maintenanceCost: calculation.maintenanceCost,

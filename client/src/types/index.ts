@@ -123,6 +123,7 @@ export interface FactionDashboardData {
   industryKokudaka: number;
   bonusCoefficient: number;
   growthRate: number;
+  commerceIncome: number;  // 商业点数收入
   maintenanceCost: MaintenanceCost;
   territories: Territory[];
   samurais: Samurai[];

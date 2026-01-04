@@ -1,0 +1,12 @@
+{
+  "name": "gekokujo-data-scraper",
+  "version": "1.0.0",
+  "description": "下克上小助手数据爬取工具",
+  "main": "scraper.js",
+  "scripts": {
+    "scrape": "node scraper.js"
+  },
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  }
+}
