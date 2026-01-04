@@ -12,11 +12,12 @@ import { LegionManagement } from './LegionManagement';
 import { SpecialProductManagement } from './SpecialProductManagement';
 import { GameProgressControl } from './GameProgressControl';
 import { DataImport } from './DataImport';
+import { DataExport } from './DataExport';
 import { ErrorReportPanel } from './ErrorReportPanel';
 import { InitialDataManagement } from './InitialDataManagement';
 import './AdminPanel.css';
 
-type AdminTab = 'territories' | 'factions' | 'factions-full' | 'legions' | 'products' | 'progress' | 'import' | 'errors' | 'initial-data';
+type AdminTab = 'territories' | 'factions' | 'factions-full' | 'legions' | 'products' | 'progress' | 'import' | 'export' | 'errors' | 'initial-data';
 
 interface AdminPanelProps {
   user: User;
@@ -36,6 +37,7 @@ export function AdminPanel({ onBack }: AdminPanelProps) {
     { key: 'progress', label: '游戏进程' },
     { key: 'initial-data', label: '初始数据' },
     { key: 'import', label: '数据导入' },
+    { key: 'export', label: '数据导出' },
     { key: 'errors', label: '错误报告' },
   ];
 
@@ -74,6 +76,7 @@ export function AdminPanel({ onBack }: AdminPanelProps) {
         {activeTab === 'progress' && <GameProgressControl />}
         {activeTab === 'initial-data' && <InitialDataManagement key={`initial-data-${refreshKey}`} />}
         {activeTab === 'import' && <DataImport onImportComplete={handleImportComplete} />}
+        {activeTab === 'export' && <DataExport />}
         {activeTab === 'errors' && <ErrorReportPanel />}
       </main>
     </div>

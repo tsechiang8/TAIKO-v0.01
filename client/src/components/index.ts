@@ -29,6 +29,7 @@ export { LegionManagement } from './LegionManagement';
 export { SpecialProductManagement } from './SpecialProductManagement';
 export { GameProgressControl } from './GameProgressControl';
 export { DataImport } from './DataImport';
+export { DataExport } from './DataExport';
 
 // 收支明细组件
 export { IncomeExpenseBreakdown } from './IncomeExpenseBreakdown';

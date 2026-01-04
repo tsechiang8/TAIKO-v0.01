@@ -1005,6 +1005,67 @@ export async function executeImport(
 }
 
 
+// ============ 数据导出 API (Requirements: 1.1-1.4) ============
+
+// 导出数据格式
+export interface ExportData {
+  version: string;
+  exportedAt: string;
+  data: {
+    gameState: GameState;
+    territories: Territory[];
+    factions: FactionData;
+    samurais: Samurai[];
+    legions: Legion[];
+    specialProducts: SpecialProduct[];
+    initialData: InitialData | null;
+    operationRecords: OperationRecord[];
+  };
+}
+
+// 游戏状态
+export interface GameState {
+  currentYear: number;
+  isLocked: boolean;
+  adminCode: string;
+  securityKey?: string;
+}
+
+// 势力数据
+export interface FactionData {
+  id: string;
+  name: string;
+  lordName: string;
+  code: string;
+  taxRate: number;
+  treasury: number;
+  idleSoldiers: number;
+  rifles: number;
+  horses: number;
+  cannons: number;
+  agriculturePoints: number;
+  commercePoints: number;
+  navyPoints: number;
+  armamentPoints: number;
+  industryKokudaka: number;
+  territoryIds: string[];
+  samuraiIds: string[];
+  legionIds: string[];
+  diplomacy: unknown[];
+  buffs: unknown[];
+}
+
+/**
+ * 导出所有游戏数据
+ * Requirements: 1.1, 1.2, 1.3
+ */
+export async function exportAllData(): Promise<ApiResponse<ExportData>> {
+  return request<ExportData>('/export/data', {
+    method: 'POST',
+  });
+}
+
+
 // ============ 错误报告 API (Requirements: 14.1-14.9) ============
 
 // 错误报告类型
