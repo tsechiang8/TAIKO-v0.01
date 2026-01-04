@@ -12,7 +12,7 @@ import { LegionManagement } from './LegionManagement';
 import { SpecialProductManagement } from './SpecialProductManagement';
 import { GameProgressControl } from './GameProgressControl';
 import { DataImport } from './DataImport';
-import { DataExport } from './DataExport';
+import { DataExportImport } from './DataExportImport';
 import { ErrorReportPanel } from './ErrorReportPanel';
 import { InitialDataManagement } from './InitialDataManagement';
 import './AdminPanel.css';
@@ -76,7 +76,7 @@ export function AdminPanel({ onBack }: AdminPanelProps) {
         {activeTab === 'progress' && <GameProgressControl />}
         {activeTab === 'initial-data' && <InitialDataManagement key={`initial-data-${refreshKey}`} />}
         {activeTab === 'import' && <DataImport onImportComplete={handleImportComplete} />}
-        {activeTab === 'export' && <DataExport />}
+        {activeTab === 'export' && <DataExportImport onImportComplete={handleImportComplete} />}
         {activeTab === 'errors' && <ErrorReportPanel />}
       </main>
     </div>

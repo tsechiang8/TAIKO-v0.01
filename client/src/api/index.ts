@@ -1066,6 +1066,31 @@ export async function exportAllData(): Promise<ApiResponse<ExportData>> {
 }
 
 
+// ============ 全局导入 API ============
+
+/**
+ * 全局导入摘要
+ */
+export interface GlobalImportSummary {
+  gameState: boolean;
+  territories: number;
+  factions: number;
+  samurais: number;
+  legions: number;
+  specialProducts: number;
+}
+
+/**
+ * 全局导入游戏数据
+ */
+export async function importGlobalData(jsonData: string): Promise<ApiResponse<GlobalImportSummary>> {
+  return request<GlobalImportSummary>('/global-import/data', {
+    method: 'POST',
+    body: JSON.stringify({ jsonData }),
+  });
+}
+
+
 // ============ 错误报告 API (Requirements: 14.1-14.9) ============
 
 // 错误报告类型

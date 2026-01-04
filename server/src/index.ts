@@ -11,6 +11,7 @@ import adminRoutes from './routes/admin';
 import gameProgressRoutes from './routes/game-progress';
 import importRoutes from './routes/import';
 import exportRoutes from './routes/export';
+import globalImportRoutes from './routes/global-import';
 import errorReportRoutes from './routes/error-report';
 import disbandSoldiersRoutes from './routes/disband-soldiers';
 import equipmentPurchaseRoutes from './routes/equipment-purchase';
@@ -69,6 +70,9 @@ app.use('/api/import', importRoutes);
 
 // Export routes (Requirements: 1.1-1.4)
 app.use('/api/export', exportRoutes);
+
+// Global import routes
+app.use('/api/global-import', globalImportRoutes);
 
 // Error report routes (Requirements: 14.1-14.9)
 app.use('/api/error-reports', errorReportRoutes);
