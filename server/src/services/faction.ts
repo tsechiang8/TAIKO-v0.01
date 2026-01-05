@@ -175,7 +175,7 @@ export function getFactionDashboard(factionId: string): FactionDashboardData | n
     armamentPoints: faction.armamentPoints,
 
     // 增益列表（最多10个）
-    buffs: faction.buffs.slice(0, 10),
+    buffs: (faction.buffs || []).slice(0, 10),
 
     // 详细计算数据
     territoryKokudaka: calculation.territoryKokudaka,
@@ -195,7 +195,7 @@ export function getFactionDashboard(factionId: string): FactionDashboardData | n
     territories,
     samurais,
     legions,
-    diplomacy: faction.diplomacy,
+    diplomacy: faction.diplomacy || [],
   };
 }
 

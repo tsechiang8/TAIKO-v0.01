@@ -250,7 +250,7 @@ export function Dashboard({ user, onLogout, onOpenAdminPanel }: DashboardProps) 
         </section>
 
         {/* 增益列表 */}
-        {data.buffs.length > 0 && (
+        {(data.buffs && data.buffs.length > 0) && (
           <section className="info-section">
             <h2>增益效果</h2>
             <div className="buffs-list">
@@ -294,7 +294,7 @@ export function Dashboard({ user, onLogout, onOpenAdminPanel }: DashboardProps) 
         </section>
 
         {/* 领地列表 */}
-        {data.territories.length > 0 && (
+        {(data.territories && data.territories.length > 0) && (
           <section className="info-section">
             <h2>领地一览</h2>
             <TerritoryList territories={data.territories} legions={data.legions} />
@@ -302,7 +302,7 @@ export function Dashboard({ user, onLogout, onOpenAdminPanel }: DashboardProps) 
         )}
 
         {/* 武士列表 */}
-        {data.samurais.length > 0 && (
+        {(data.samurais && data.samurais.length > 0) && (
           <section className="info-section">
             <h2>武士一览</h2>
             <SamuraiList samurais={data.samurais} />
@@ -310,7 +310,7 @@ export function Dashboard({ user, onLogout, onOpenAdminPanel }: DashboardProps) 
         )}
 
         {/* 外交关系列表 */}
-        {data.diplomacy.length > 0 && (
+        {(data.diplomacy && data.diplomacy.length > 0) && (
           <section className="info-section">
             <h2>外交关系</h2>
             <DiplomacyList diplomacy={data.diplomacy} />
