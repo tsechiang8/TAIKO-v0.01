@@ -230,6 +230,9 @@ export function createLegion(
   samurais[samuraiIndex].isIdle = false;
 
   // 12. 更新势力的军团列表
+  if (!factions[factionIndex].legionIds) {
+    factions[factionIndex].legionIds = [];
+  }
   if (!factions[factionIndex].legionIds.includes(newLegion.id)) {
     factions[factionIndex].legionIds.push(newLegion.id);
   }
@@ -306,9 +309,11 @@ export function disbandLegion(
   }
 
   // 6. 从势力的军团列表中移除
-  const legionIdIndex = factions[factionIndex].legionIds.indexOf(legionId);
-  if (legionIdIndex !== -1) {
-    factions[factionIndex].legionIds.splice(legionIdIndex, 1);
+  if (factions[factionIndex].legionIds) {
+    const legionIdIndex = factions[factionIndex].legionIds.indexOf(legionId);
+    if (legionIdIndex !== -1) {
+      factions[factionIndex].legionIds.splice(legionIdIndex, 1);
+    }
   }
 
   // 7. 删除军团

@@ -485,7 +485,7 @@ export function deleteFaction(factionId: string): { success: boolean; error?: st
   const faction = factions[index];
 
   // 检查是否有军团
-  if (faction.legionIds.length > 0) {
+  if (faction.legionIds && faction.legionIds.length > 0) {
     return { success: false, error: '该势力还有军团，请先解散所有军团' };
   }
 
@@ -693,7 +693,9 @@ export function adminDeleteLegion(legionId: string): { success: boolean; error?:
   const factions = getFactions();
   const faction = factions.find(f => f.id === legion.factionId);
   if (faction) {
-    faction.legionIds = faction.legionIds.filter(lid => lid !== legionId);
+    if (faction.legionIds) {
+      faction.legionIds = faction.legionIds.filter(lid => lid !== legionId);
+    }
     
     // 返还资源到势力库存
     faction.idleSoldiers += legion.soldierCount;
