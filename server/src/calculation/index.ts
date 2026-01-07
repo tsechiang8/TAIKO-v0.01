@@ -293,7 +293,6 @@ export function calculateSurfaceKokudaka(params: {
   specialProductKokudaka: number;
   integrationBonus: number;
   industryKokudaka: number;
-  commerceIncome?: number;  // 商业点数收入
 }): number {
   const {
     territoryKokudaka,
@@ -302,15 +301,13 @@ export function calculateSurfaceKokudaka(params: {
     specialProductKokudaka,
     integrationBonus,
     industryKokudaka,
-    commerceIncome = 0,
   } = params;
 
   return (
     territoryKokudaka * (1 + bonusCoefficient + specialProductKokudakaBonus) +
     specialProductKokudaka +
     integrationBonus +
-    industryKokudaka +
-    commerceIncome
+    industryKokudaka
   );
 }
 
@@ -540,7 +537,7 @@ export function calculateFactionData(
   // 商业点数收入
   const commerceIncome = calculateCommerceIncome(faction.commercePoints);
 
-  // 表面石高和收入（包含特产石高加成系数和商业点数收入）
+  // 表面石高（不包含商业点数收入）
   const surfaceKokudaka = calculateSurfaceKokudaka({
     territoryKokudaka,
     bonusCoefficient,
@@ -548,9 +545,9 @@ export function calculateFactionData(
     specialProductKokudaka,
     integrationBonus,
     industryKokudaka: faction.industryKokudaka,
-    commerceIncome,
   });
-  const income = calculateIncome(surfaceKokudaka, faction.taxRate);
+  // 年度收入 = 表面石高 × 税率 × 0.4 + 商业点数收入
+  const income = calculateIncome(surfaceKokudaka, faction.taxRate) + commerceIncome;
 
   // 武备等级
   const armamentLevel = getArmamentLevel(faction.armamentPoints);
